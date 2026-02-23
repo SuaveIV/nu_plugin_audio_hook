@@ -17,7 +17,7 @@ jobs:
       - name: Setup Nushell
         uses: hustcer/setup-nu@v3
         with:
-          version: "0.108.0"
+          version: "0.110.0"
 
       - uses: actions/checkout@v4
         with:
@@ -45,28 +45,35 @@ jobs:
             } catch {
               gh latest tag $plugin_repository
             })
-          let sanitized_plugin_version = ($plugin_version | str replace --regex "^v" "")
+          
+          $plugin_version | str replace --regex "^v" "" | let sanitized_plugin_version: string
 
           mut content = (open Cargo.toml --raw)
 
           # Update package version
-          $content = ($content | str replace --regex '(?m)^version\s*=\s*".*?"' $"version = \"($sanitized_plugin_version)\"" --range 0..1)
+          $content = ($content | str replace --regex '(?m)^(version\s*=\s*)".*?"' $"${1}\"($sanitized_plugin_version)\"" --range 0..1)
 
           let toml_data = (open Cargo.toml)
-          let nu_deps = ($toml_data.dependencies | columns | where ($it =~ "^nu-.*"))
+          
+          ($toml_data.dependencies? | default {} | columns)
+            | append ($toml_data.dev-dependencies? | default {} | columns)
+            | where ($it =~ "^nu-.*")
+            | uniq
+            | let nu_deps: list<string>
 
-          for dep in $nu_deps {
-            $content = ($content | str replace --regex $"(?m)^($dep)\\s*=\\s*\".*?\"" $"${1}\"($sanitized_plugin_version)\"")
-            $content = ($content | str replace --regex $"(?s)(\[dependencies\.($dep)\][^\[]*?version\\s*=\\s*)\".*?\"" $"${1}\"($sanitized_plugin_version)\"")
-            $content = ($content | str replace --regex $"(?m)^($dep)\\s*=.*version\\s*=\\s*\"[^\"]+\"" $"${1}\"($sanitized_plugin_version)\"")
-          }
+          $content = ($nu_deps | reduce --fold $content {|dep, acc|
+            $acc
+              | str replace --regex ("(?m)^(" + $dep + "\\s*=\\s*)\".*?\"") ("${1}\"" + $sanitized_plugin_version + "\"")
+              | str replace --regex ("(?s)(\\[dependencies\\." + $dep + "\\][^\\[]*?version\\s*=\\s*)\".*?\"") ("${1}\"" + $sanitized_plugin_version + "\"")
+              | str replace --regex ("(?m)^(" + $dep + "\\s*=.*version\\s*=\\s*)\"[^\"]+\"") ("${1}\"" + $sanitized_plugin_version + "\"")
+          })
 
-          let inter_val = ($toml_data.dependencies | get -i interprocess)
+          $toml_data.dependencies? | get -o interprocess | let inter_val
           if ($inter_val | describe | str starts-with "record") {
               $content = ($content | str replace --regex '(?s)(\[dependencies\.interprocess\][^\[]*?version\s*=\s*)".*?"' '${1}"=2.2.1"')
               $content = ($content | str replace --regex '(?m)^(interprocess\s*=.*version\s*=\s*)".*?"' '${1}"=2.2.1"')
-          } else {
-              $content = ($content | str replace --regex '(?m)^interprocess\s*=\s*".*?"' 'interprocess = "=2.2.1"')
+          } else if $inter_val != null {
+              $content = ($content | str replace --regex '(?m)^(interprocess\s*=\s*)".*?"' '${1}"=2.2.1"')
           }
 
           $content | save --force Cargo.toml
@@ -111,7 +118,7 @@ jobs:
         if: steps.check_commits.outputs.has_commits == '1'
         shell: nu {0}
         run: |
-          let version = (open Cargo.toml | get package.version | str trim)
+          open Cargo.toml | get package.version | str trim | let version: string
           $"version=($version)" | save --force $env.GITHUB_OUTPUT
 
       - name: Create GitHub Release
