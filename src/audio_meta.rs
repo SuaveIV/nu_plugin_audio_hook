@@ -141,52 +141,54 @@ fn parse_tags(path: &std::path::Path, span: Span) -> Result<(Record, Option<Dura
     let mut record = record! {};
     let mut lofty_duration: Option<Duration> = None;
 
-    let file_size = std::fs::metadata(path).map(|m| m.len()).unwrap_or(0);
+    let file_size = std::fs::metadata(path)
+        .map(|m| m.len())
+        .map_err(|e| LabeledError::new(e.to_string()).with_label("error reading file metadata", span))?;
     record.push("size", Value::filesize(file_size as i64, span));
 
     if let Some(ext) = path.extension() {
         record.push("format", Value::string(ext.to_string_lossy().to_string(), span));
     }
 
-    let tagged_file_res = read_from_path(path);
-    if let Err(ref e) = tagged_file_res {
-        warn!("Error reading tags from {:?}: {}", path, e);
-    }
-    let tagged_file = tagged_file_res.ok();
-    if let Some(tagged_file) = tagged_file {
-        // ── FileProperties ────────────────────────────────────────────────────
-        let props = tagged_file.properties();
-        if let Some(v) = props.overall_bitrate() {
-            record.push("bitrate", Value::int(v as i64, span));
-        }
-        if let Some(v) = props.audio_bitrate() {
-            record.push("audio_bitrate", Value::int(v as i64, span));
-        }
-        if let Some(v) = props.bit_depth() {
-            record.push("bit_depth", Value::int(v as i64, span));
-        }
-        // Capture the container-header duration as a fallback for decoders
-        // (e.g. minimp3) that cannot determine duration from the stream alone.
-        let d = props.duration();
-        if !d.is_zero() {
-            lofty_duration = Some(d);
-        }
+    let tagged_file = read_from_path(path)
+        .map_err(|e| LabeledError::new(e.to_string()).with_label("error reading tags", span))?;
 
-        // ── Tag fields ────────────────────────────────────────────────────────
-        if let Some(tag) = tagged_file.primary_tag() {
-            let mut seen_keys = HashSet::new();
-            for (key, val) in TAG_MAP.iter() {
-                if *val == lofty::tag::ItemKey::TrackNumber || *val == lofty::tag::ItemKey::DiscNumber {
-                    continue;
-                }
-                if seen_keys.contains(val) {
-                    continue;
-                }
-                if let Some(result) = tag.get_string(*val) {
-                    insert_into_str(&mut record, key, Some(result.to_string()), span);
-                    seen_keys.insert(*val);
-                }
+    // ── FileProperties ────────────────────────────────────────────────────
+    let props = tagged_file.properties();
+    if let Some(v) = props.overall_bitrate() {
+        record.push("bitrate", Value::int(v as i64, span));
+    }
+    if let Some(v) = props.audio_bitrate() {
+        record.push("audio_bitrate", Value::int(v as i64, span));
+    }
+    if let Some(v) = props.bit_depth() {
+        record.push("bit_depth", Value::int(v as i64, span));
+    }
+    // Capture the container-header duration as a fallback for decoders
+    // (e.g. minimp3) that cannot determine duration from the stream alone.
+    let d = props.duration();
+    if !d.is_zero() {
+        lofty_duration = Some(d);
+    }
+
+    // ── Tag fields ────────────────────────────────────────────────────────
+    if let Some(tag) = tagged_file.primary_tag() {
+        let mut seen_keys = HashSet::new();
+        for (key, val) in TAG_MAP.iter() {
+            if *val == lofty::tag::ItemKey::TrackNumber || *val == lofty::tag::ItemKey::DiscNumber {
+                continue;
             }
+            // Because TAG_MAP is a BTreeMap and iterates in sorted (alphabetical) key order,
+            // when multiple map keys (e.g. "organization" and "publisher") resolve to the same
+            // ItemKey (Publisher), the first encountered key wins.
+            if seen_keys.contains(val) {
+                continue;
+            }
+            if let Some(result) = tag.get_string(*val) {
+                insert_into_str(&mut record, key, Some(result.to_string()), span);
+                seen_keys.insert(*val);
+            }
+        }
 
             insert_into_integer(&mut record, "track_no", tag.track(), span);
             insert_into_integer(&mut record, "total_tracks", tag.track_total(), span);
@@ -218,7 +220,6 @@ fn parse_tags(path: &std::path::Path, span: Span) -> Result<(Record, Option<Dura
                     .collect();
                 record.push("artwork", Value::list(artwork, span));
             }
-        }
     }
     Ok((record, lofty_duration))
 }

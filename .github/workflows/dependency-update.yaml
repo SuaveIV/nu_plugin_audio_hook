@@ -51,7 +51,7 @@ jobs:
           mut content = (open Cargo.toml --raw)
 
           # Update package version
-          $content = ($content | str replace --regex '(?m)^(version\s*=\s*)".*?"' $"${1}\"($sanitized_plugin_version)\"" --range 0..1)
+          $content = ($content | str replace --regex '(?m)^(version\s*=\s*)".*?"' $"${1}\"($sanitized_plugin_version)\"")
 
           let toml_data = (open Cargo.toml)
           
