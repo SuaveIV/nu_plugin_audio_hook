@@ -19,7 +19,7 @@ jobs:
           persist-credentials: false
           submodules: recursive
       - name: Install cross
-        run: cargo install cross
+        run: cargo install cross --version 0.2.6 --locked
       - name: Build
         run: cross build --release --locked --features=all-decoders --target aarch64-unknown-linux-gnu
       - name: Package
@@ -27,6 +27,21 @@ jobs:
           tar -czf \
             nu_plugin_audio-${{ github.ref_name }}-aarch64-unknown-linux-gnu.tar.gz \
             -C target/aarch64-unknown-linux-gnu/release nu_plugin_audio
+      - name: Wait for main release
+        run: |
+          echo "Waiting for main release to be created for tag ${{ github.ref_name }}"
+          for i in {1..60}; do
+            if gh api repos/${{ github.repository }}/releases/tags/${{ github.ref_name }} > /dev/null 2>&1; then
+              echo "Main release found, proceeding with upload"
+              break
+            fi
+            if [ $i -eq 60 ]; then
+              echo "Timeout waiting for main release after 60 attempts"
+              exit 1
+            fi
+            echo "Attempt $i/60: Main release not found, waiting 2 seconds..."
+            sleep 2
+          done
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
         with:

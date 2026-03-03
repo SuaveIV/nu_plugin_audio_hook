@@ -1,4 +1,27 @@
 use std log
+
+def http-get-with-retry [
+    url: string
+    max_retries: int = 3
+    timeout: duration = 10sec
+]: nothing -> any {
+    mut last_err = null
+    for attempt in 1..$max_retries {
+        let err = try {
+            return (http get --max-time $timeout $url)
+            null
+        } catch {|e| $e }
+
+        $last_err = $err
+        if $attempt < $max_retries {
+            sleep (($attempt * 200) * 1ms)
+        }
+    }
+    error make {
+        msg: $"Failed to fetch ($url) after ($max_retries) attempts"
+        help: ($last_err | get msg? | default "unknown error")
+    }
+}
 let features = [
     flac
     minimp3
@@ -32,7 +55,7 @@ def download_and_install [url: string, filename: string, install_root: path, nam
     let archive_path = $tmp_dir | path join $filename
 
     try {
-        http get $url | save $archive_path
+        http-get-with-retry $url 3 30sec | save $archive_path
     } catch {
         log warning "failed to download artifact"
         return false
@@ -49,6 +72,12 @@ def download_and_install [url: string, filename: string, install_root: path, nam
                 } else {
                     ^unzip -o $archive_path -d $tmp_dir
                 }
+            }
+        } else if ($filename | str ends-with ".tar.xz") {
+            try {
+                ^xz -dc $archive_path | ^tar -xf - -C $tmp_dir
+            } catch {
+                ^tar -xf $archive_path -C $tmp_dir
             }
         } else {
             ^tar -xf $archive_path -C $tmp_dir
@@ -78,6 +107,16 @@ def download_and_install [url: string, filename: string, install_root: path, nam
     return true
 }
 
+def check_and_download_prebuilt [url: string, filename: string, install_root: path, name: string] {
+    try {
+        http head $url
+        return (download_and_install $url $filename $install_root $name)
+    } catch {
+        log warning "prebuilt binary not found on GitHub releases, falling back to source build"
+        return false
+    }
+}
+
 def install_prebuilt [
     repo_root: path,
     install_root: path,
@@ -96,27 +135,23 @@ def install_prebuilt [
 
     log info $"checking for prebuilt binary at ($url)"
 
-    try {
-        http head $url
-    } catch {
-        if $ext == "tar.gz" {
-             let ext_xz = "tar.xz"
-             let filename_xz = $"($name)-v($version)-($target).($ext_xz)"
-             let url_xz = $"https://github.com/SuaveIV/($name)/releases/download/v($version)/($filename_xz)"
-             log info $"checking for prebuilt binary at ($url_xz)"
-             try {
-                 http head $url_xz
-                 return (download_and_install $url_xz $filename_xz $install_root $name)
-             } catch {
-                 log warning "prebuilt binary not found on GitHub releases, falling back to source build"
-                 return false
-             }
-        }
-        log warning "prebuilt binary not found on GitHub releases, falling back to source build"
-        return false
+    if (check_and_download_prebuilt $url $filename $install_root $name) {
+        return true
     }
 
-    return (download_and_install $url $filename $install_root $name)
+    # Try alternative extensions if tar.gz failed
+    if $ext == "tar.gz" {
+        let ext_xz = "tar.xz"
+        let filename_xz = $"($name)-v($version)-($target).($ext_xz)"
+        let url_xz = $"https://github.com/SuaveIV/($name)/releases/download/v($version)/($filename_xz)"
+        log info $"checking for prebuilt binary at ($url_xz)"
+
+        if (check_and_download_prebuilt $url_xz $filename_xz $install_root $name) {
+            return true
+        }
+    }
+
+    return false
 }
 
 def main [package_file: path = nupm.nuon] {
