@@ -48,7 +48,7 @@ jobs:
             } catch {
               gh latest tag $plugin_repository
             })
-          
+
           $plugin_version | str replace --regex "^v" "" | let sanitized_plugin_version: string
 
           mut content = (open Cargo.toml --raw)
@@ -57,7 +57,7 @@ jobs:
           $content = ($content | str replace --regex '(?m)^(version\s*=\s*)".*?"' $"${1}\"($sanitized_plugin_version)\"")
 
           let toml_data = (open Cargo.toml)
-          
+
           ($toml_data.dependencies? | default {} | columns)
             | append ($toml_data.dev-dependencies? | default {} | columns)
             | where ($it =~ "^nu-.*")
@@ -77,6 +77,7 @@ jobs:
             | str replace --regex '(\s*version:\s*)".*?"' $"${1}\"($sanitized_plugin_version)\""
             | save --force nupm.nuon
 
+          rm --force Cargo.lock
           cargo update
           cargo check
 
