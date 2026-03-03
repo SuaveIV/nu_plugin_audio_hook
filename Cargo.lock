@@ -1308,7 +1308,6 @@ dependencies = [
  "chrono",
  "crossterm",
  "env_logger",
- "interprocess",
  "lofty",
  "log",
  "nu-plugin",

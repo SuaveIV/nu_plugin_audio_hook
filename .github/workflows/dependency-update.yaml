@@ -5,6 +5,9 @@ on:
 
 name: Update dependencies
 
+permissions:
+  contents: write
+
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -15,11 +18,11 @@ jobs:
           sudo apt-get install -y alsa-utils libasound2-dev
 
       - name: Setup Nushell
-        uses: hustcer/setup-nu@v3
+        uses: hustcer/setup-nu@920172d92eb04671776f3ba69d605d3b09351c30  # v3
         with:
           version: "0.110.0"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
         with:
           fetch-depth: 0
 
@@ -68,21 +71,12 @@ jobs:
               | str replace --regex ("(?m)^(" + $dep + "\\s*=.*version\\s*=\\s*)\"[^\"]+\"") ("${1}\"" + $sanitized_plugin_version + "\"")
           })
 
-          $toml_data.dependencies? | get -o interprocess | let inter_val
-          if ($inter_val | describe | str starts-with "record") {
-              $content = ($content | str replace --regex '(?s)(\[dependencies\.interprocess\][^\[]*?version\s*=\s*)".*?"' '${1}"=2.2.1"')
-              $content = ($content | str replace --regex '(?m)^(interprocess\s*=.*version\s*=\s*)".*?"' '${1}"=2.2.1"')
-          } else if $inter_val != null {
-              $content = ($content | str replace --regex '(?m)^(interprocess\s*=\s*)".*?"' '${1}"=2.2.1"')
-          }
-
           $content | save --force Cargo.toml
 
           open nupm.nuon --raw
             | str replace --regex '(\s*version:\s*)".*?"' $"${1}\"($sanitized_plugin_version)\""
             | save --force nupm.nuon
 
-          cargo update interprocess --precise 2.2.1
           cargo update
           cargo check
 
