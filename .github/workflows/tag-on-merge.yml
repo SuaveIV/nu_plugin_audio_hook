@@ -21,20 +21,10 @@ jobs:
       - name: Extract version
         id: extract_version
         run: |
-          version=$(grep -m1 '^version' Cargo.toml | sed 's/.*"\(.*\)".*/\1/')
+          version=$(sed -n 's/^version = "\([^"]*\)".*/\1/p' Cargo.toml | head -n 1)
           echo "version=$version" >> $GITHUB_OUTPUT
 
-      - name: Check tag does not already exist
-        id: check_tag
-        run: |
-          if git rev-parse "v${{ steps.extract_version.outputs.version }}" >/dev/null 2>&1; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Push tag
-        if: steps.check_tag.outputs.exists == 'false'
         run: |
-          git tag v${{ steps.extract_version.outputs.version }}
-          git push origin v${{ steps.extract_version.outputs.version }}
+          git tag v${{ steps.extract_version.outputs.version }} || true
+          git push origin refs/tags/v${{ steps.extract_version.outputs.version }} --force-with-lease=refs/tags/v${{ steps.extract_version.outputs.version }} || true

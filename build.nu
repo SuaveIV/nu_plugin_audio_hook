@@ -49,7 +49,15 @@ def detect_target [] {
     }
 }
 
-def download_and_install [url: string, filename: string, install_root: path, name: string] {
+def download_and_install [
+    url: string
+    filename: string
+    install_root: path
+    name: string
+    checksum_url?: string
+    expected_checksum?: string
+    signature_path?: string
+] {
     log info $"downloading prebuilt binary..."
     let tmp_dir = (mktemp -d)
     let archive_path = $tmp_dir | path join $filename
@@ -58,8 +66,40 @@ def download_and_install [url: string, filename: string, install_root: path, nam
         http-get-with-retry $url 3 30sec | save $archive_path
     } catch {
         log warning "failed to download artifact"
-        rm -rf $tmp_dir
         return false
+    }
+
+    let gpg_available = (which gpg | is-not-empty)
+
+    if ($signature_path != null) and $gpg_available {
+        try {
+            gpg --verify $signature_path $archive_path
+        } catch {
+            log warning "gpg signature verification failed"
+            rm -rf $tmp_dir
+            return false
+        }
+    } else {
+        let expected = if ($expected_checksum != null) {
+            $expected_checksum
+        } else if ($checksum_url != null) {
+            try { http get $checksum_url | str trim } catch { null }
+        }
+
+        if ($expected != null) {
+            let is_md5 = ($expected | str length) == 32
+            let actual = if $is_md5 {
+                open $archive_path | hash md5
+            } else {
+                open $archive_path | hash sha256
+            }
+
+            if $actual != $expected {
+                log warning $"checksum mismatch: expected ($expected), got ($actual)"
+                rm -rf $tmp_dir
+                return false
+            }
+        }
     }
 
     log info "extracting..."
@@ -85,7 +125,6 @@ def download_and_install [url: string, filename: string, install_root: path, nam
         }
     } catch {
         log warning "failed to extract artifact"
-        rm -rf $tmp_dir
         return false
     }
 
@@ -94,7 +133,6 @@ def download_and_install [url: string, filename: string, install_root: path, nam
 
     if ($found | is-empty) {
         log warning $"binary ($bin_name) not found in archive"
-        rm -rf $tmp_dir
         return false
     }
 
