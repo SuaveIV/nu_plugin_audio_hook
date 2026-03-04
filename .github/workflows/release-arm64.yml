@@ -4,6 +4,11 @@ permissions:
   contents: write
 
 on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag name (e.g. v0.2.0)'
+        required: true
   push:
     tags:
       - '**[0-9]+.[0-9]+.[0-9]+*'
@@ -13,6 +18,7 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -25,13 +31,13 @@ jobs:
       - name: Package
         run: |
           tar -czf \
-            nu_plugin_audio-${{ github.ref_name }}-aarch64-unknown-linux-gnu.tar.gz \
+            nu_plugin_audio-${{ env.TAG }}-aarch64-unknown-linux-gnu.tar.gz \
             -C target/aarch64-unknown-linux-gnu/release nu_plugin_audio
       - name: Wait for main release
         run: |
-          echo "Waiting for main release to be created for tag ${{ github.ref_name }}"
+          echo "Waiting for main release to be created for tag ${{ env.TAG }}"
           for i in {1..360}; do
-            if gh api repos/${{ github.repository }}/releases/tags/${{ github.ref_name }} > /dev/null 2>&1; then
+            if gh api repos/${{ github.repository }}/releases/tags/${{ env.TAG }} > /dev/null 2>&1; then
               echo "Main release found, proceeding with upload"
               break
             fi
@@ -45,5 +51,5 @@ jobs:
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: nu_plugin_audio-${{ github.ref_name }}-aarch64-unknown-linux-gnu.tar.gz
-          tag_name: ${{ github.ref_name }}
+          files: nu_plugin_audio-${{ env.TAG }}-aarch64-unknown-linux-gnu.tar.gz
+          tag_name: ${{ env.TAG }}
