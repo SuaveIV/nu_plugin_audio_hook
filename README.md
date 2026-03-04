@@ -24,70 +24,60 @@ This project is a continuation and expansion of the original `nu_plugin_audio_ho
 
 ```bash
 sound make 1000 200ms
-
 ```
 
 ### Generate a noise sequence
 
 ```bash
 [ 300.0, 500.0, 1000.0, 400.0, 600.0 ] | each { |it| sound make $it 150ms }
-
 ```
 
 ### Generate a noise with 50% volume
 
 ```bash
 sound make 1000 200ms -a 0.5
-
 ```
 
 ### Save a generated tone to a file
 
 ```bash
 sound make 1000 200ms --data | save --raw output.wav
-
 ```
 
 ### Play an audio file (first 3 seconds only)
 
 ```bash
 sound play audio.mp3 -d 3sec
-
 ```
 
 ### Play an audio file starting at 2x volume
 
 ```bash
 sound play audio.mp3 -a 2.0
-
 ```
 
 ### Play an audio file starting at 50% volume
 
 ```bash
 sound play audio.mp3 -a 0.5
-
 ```
 
 ### Play silently (no terminal output for scripts or background tasks)
 
 ```bash
 sound play audio.mp3 --no-progress
-
 ```
 
 ### Play with Nerd Font icons
 
 ```bash
 sound play audio.mp3 --nerd-fonts
-
 ```
 
 ### Retrieve metadata from an audio file
 
 ```bash
 sound meta audio.mp3
-
 ```
 
 Example output:
@@ -112,7 +102,6 @@ Example output:
 │ sample_rate   │ 44100                      │
 │ channels      │ 2                          │
 ╰───────────────┴────────────────────────────╯
-
 ```
 
 The `artwork` field is a list of records, one per embedded image:
@@ -124,7 +113,6 @@ sound meta audio.mp3 | get artwork
 # ├───┼───────────────┼────────────┼──────────┤
 # │ 0 │ CoverFront    │ image/jpeg │ 127.3 KB │
 # ╰───┴───────────────┴────────────┴──────────╯
-
 ```
 
 FLAC and lossless files additionally expose `bit_depth`:
@@ -137,14 +125,12 @@ sound meta audio.flac | select size format bitrate bit_depth
 # │ bitrate   │ 1411     │
 # │ bit_depth │ 24       │
 # ╰───────────┴──────────╯
-
 ```
 
 ### Modify metadata (change the artist tag)
 
 ```bash
 sound meta set audio.mp3 -k artist -v "new-artist"
-
 ```
 
 Key names are case-insensitive. `artist`, `Artist`, and `ARTIST` all work. Key names are format-agnostic. The same key works across MP3, FLAC, OGG, and MP4 files. Use `sound meta --all` to list every available key name.
@@ -153,7 +139,6 @@ Key names are case-insensitive. `artist`, `Artist`, and `ARTIST` all work. Key n
 
 ```bash
 sound meta set audio.mp3 -k comment -v "ripped from vinyl"
-
 ```
 
 ### Set ReplayGain values
@@ -161,14 +146,12 @@ sound meta set audio.mp3 -k comment -v "ripped from vinyl"
 ```bash
 sound meta set audio.mp3 -k replaygain_track_gain -v "-6.2 dB"
 sound meta set audio.mp3 -k replaygain_track_peak -v "0.998"
-
 ```
 
 ### List all available metadata key names
 
 ```bash
 sound meta --all
-
 ```
 
 Key names are normalised to lowercase before lookup, so `Artist`, `ARTIST`, and `artist` are all accepted. The table below shows every supported key grouped by category.
@@ -261,7 +244,6 @@ When you play a file, `sound play` renders a live progress bar to stderr:
 
 ```nushell
 ▶  0:42 / 4:05  [██████████░░░░░░░░░░░░░░░░░░░░]  17%  🔊 [████████░░░░░░] 100%
-
 ```
 
 Because the display writes to stderr, stdout remains clean. Piping the result of `sound play` to another command works without any garbled output. Use `--no-progress` (`-q`) to suppress the display entirely.
@@ -272,14 +254,12 @@ If you have a [Nerd Font](https://www.nerdfonts.com) installed and configured in
 
 ```nushell
   0:42 / 4:05  [██████████░░░░░░░░░░░░░░░░░░░░]  17%   [████████░░░░░░] 100%
-
 ```
 
 To enable permanently, add this to your `env.nu`:
 
 ```nushell
 $env.NERD_FONTS = "1"
-
 ```
 
 ---
@@ -302,7 +282,6 @@ The control hint is shown inline on the progress bar and updates live to reflect
 
 ```nushell
 ▶  0:42 / 4:05  [██████████░░░░░░░░░░░░░░░░░░░░]  17%  🔊 [████████░░░░░░] 100%  « [SPACE/pause] »  [↑↓/kj] vol  [m] mute  [q] quit
-
 ```
 
 Use `--no-progress` to disable terminal output and controls. This is recommended when you run tasks in the background or pipe output.
@@ -311,61 +290,72 @@ Use `--no-progress` to disable terminal output and controls. This is recommended
 
 ## Installation
 
-### Linux: install ALSA development package
+### Linux requirements (ALSA)
 
-#### Debian / Ubuntu
+Before installing on Linux, make sure the ALSA development package is present:
 
-```bash
-sudo apt update
-sudo apt install -y libasound2-dev pkg-config
+| Distro | Command |
+| --- | --- |
+| Debian / Ubuntu | `sudo apt install libasound2-dev pkg-config` |
+| Fedora / RHEL | `sudo dnf install alsa-lib-devel pkgconf-pkg-config` |
+| Arch | `sudo pacman -S alsa-lib pkgconf` |
+| openSUSE | `sudo zypper install alsa-lib-devel pkg-config` |
 
-```
+### Using [nupm](https://github.com/nushell/nupm) (Recommended)
 
-#### RHEL / CentOS / Rocky / Alma
-
-```bash
-sudo dnf install -y alsa-lib-devel pkgconf-pkg-config
-
-```
-
-#### Arch Linux
-
-```bash
-sudo pacman -S --needed alsa-lib pkgconf
-
-```
-
-#### openSUSE
-
-```bash
-sudo zypper install alsa-lib-devel pkg-config
-
-```
-
-### Recommended: using [nupm](https://github.com/nushell/nupm)
-
-```bash
-git clone [https://github.com/SuaveIV/nu_plugin_audio.git](https://github.com/SuaveIV/nu_plugin_audio.git)
+```nushell
+git clone https://github.com/SuaveIV/nu_plugin_audio.git
 nupm install --path nu_plugin_audio -f
-
 ```
 
-### Manual compilation
+### Shell Installer (Linux / macOS)
+
+No Rust toolchain required. Run this in your terminal, then register the plugin in Nushell:
 
 ```bash
-git clone [https://github.com/SuaveIV/nu_plugin_audio.git](https://github.com/SuaveIV/nu_plugin_audio.git)
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/SuaveIV/nu_plugin_audio/releases/latest/download/nu_plugin_audio-installer.sh | sh
+```
+
+```nushell
+plugin add ~/.cargo/bin/nu_plugin_audio
+```
+
+### PowerShell Installer (Windows)
+
+No Rust toolchain required. Run this in PowerShell, then register the plugin in Nushell:
+
+```powershell
+irm https://github.com/SuaveIV/nu_plugin_audio/releases/latest/download/nu_plugin_audio-installer.ps1 | iex
+```
+
+```nushell
+plugin add ($env.USERPROFILE | path join ".cargo" "bin" "nu_plugin_audio.exe")
+```
+
+### cargo-binstall
+
+```nushell
+cargo binstall nu_plugin_audio
+plugin add ~/.cargo/bin/nu_plugin_audio
+```
+
+### Manual Download
+
+Download the prebuilt binary for your platform from the [Releases page](https://github.com/SuaveIV/nu_plugin_audio/releases), extract it, and register it:
+
+```nushell
+plugin add path/to/nu_plugin_audio
+```
+
+### Compile from Source
+
+Only needed if you want custom feature flags:
+
+```nushell
+git clone https://github.com/SuaveIV/nu_plugin_audio.git
 cd nu_plugin_audio
 cargo build -r --locked --features=all-decoders
 plugin add target/release/nu_plugin_audio
-
-```
-
-### Install via Cargo (git)
-
-```bash
-cargo install --git [https://github.com/SuaveIV/nu_plugin_audio.git](https://github.com/SuaveIV/nu_plugin_audio.git) --locked --features=all-decoders
-plugin add ~/.cargo/bin/nu_plugin_audio
-
 ```
 
 ---
@@ -412,7 +402,6 @@ cargo build -r --locked --features=symphonia-mp3,symphonia-aac,symphonia-isomp4
 
 # Everything
 cargo build -r --locked --features=all-decoders
-
 ```
 
 ---

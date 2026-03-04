@@ -1,0 +1,49 @@
+name: Release ARM64
+
+permissions:
+  contents: write
+
+on:
+  push:
+    tags:
+      - '**[0-9]+.[0-9]+.[0-9]+*'
+
+jobs:
+  build-arm64:
+    runs-on: ubuntu-22.04
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - name: Install cross
+        run: cargo install cross --version 0.2.6 --locked
+      - name: Build
+        run: cross build --release --locked --features=all-decoders --target aarch64-unknown-linux-gnu
+      - name: Package
+        run: |
+          tar -czf \
+            nu_plugin_audio-${{ github.ref_name }}-aarch64-unknown-linux-gnu.tar.gz \
+            -C target/aarch64-unknown-linux-gnu/release nu_plugin_audio
+      - name: Wait for main release
+        run: |
+          echo "Waiting for main release to be created for tag ${{ github.ref_name }}"
+          for i in {1..360}; do
+            if gh api repos/${{ github.repository }}/releases/tags/${{ github.ref_name }} > /dev/null 2>&1; then
+              echo "Main release found, proceeding with upload"
+              break
+            fi
+            if [ $i -eq 360 ]; then
+              echo "Timeout waiting for main release after 360 attempts"
+              exit 1
+            fi
+            echo "Attempt $i/360: Main release not found, waiting 5 seconds..."
+            sleep 5
+          done
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: nu_plugin_audio-${{ github.ref_name }}-aarch64-unknown-linux-gnu.tar.gz
+          tag_name: ${{ github.ref_name }}

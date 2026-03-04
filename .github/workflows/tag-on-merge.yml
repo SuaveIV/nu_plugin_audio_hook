@@ -1,0 +1,30 @@
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - Cargo.toml
+
+name: Tag release on merge
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Extract version
+        id: extract_version
+        run: |
+          version=$(sed -n 's/^version = "\([^"]*\)".*/\1/p' Cargo.toml | head -n 1)
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Push tag
+        run: |
+          git tag v${{ steps.extract_version.outputs.version }} || true
+          git push origin refs/tags/v${{ steps.extract_version.outputs.version }} --force-with-lease=refs/tags/v${{ steps.extract_version.outputs.version }} || true
