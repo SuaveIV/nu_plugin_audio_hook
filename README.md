@@ -308,6 +308,37 @@ git clone https://github.com/SuaveIV/nu_plugin_audio.git
 nupm install --path nu_plugin_audio -f
 ```
 
+### Shell Installer (Linux / macOS)
+
+No Rust toolchain required. Run this in your terminal, then register the plugin in Nushell:
+
+```bash
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/SuaveIV/nu_plugin_audio/releases/latest/download/nu_plugin_audio-installer.sh | sh
+```
+
+```nushell
+plugin add ~/.cargo/bin/nu_plugin_audio
+```
+
+### PowerShell Installer (Windows)
+
+No Rust toolchain required. Run this in PowerShell, then register the plugin in Nushell:
+
+```powershell
+irm https://github.com/SuaveIV/nu_plugin_audio/releases/latest/download/nu_plugin_audio-installer.ps1 | iex
+```
+
+```nushell
+plugin add ($env.USERPROFILE | path join ".cargo" "bin" "nu_plugin_audio.exe")
+```
+
+### cargo-binstall
+
+```nushell
+cargo binstall nu_plugin_audio
+plugin add ~/.cargo/bin/nu_plugin_audio
+```
+
 ### Manual Download
 
 Download the prebuilt binary for your platform from the [Releases page](https://github.com/SuaveIV/nu_plugin_audio/releases), extract it, and register it:

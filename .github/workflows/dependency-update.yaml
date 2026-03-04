@@ -7,6 +7,7 @@ name: Update dependencies
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   update:
@@ -22,13 +23,9 @@ jobs:
         with:
           version: "0.110.0"
 
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
-      - name: Save HEAD before commit
-        id: head_before
-        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Upgrade dependencies
         id: upgrade
@@ -94,30 +91,20 @@ jobs:
                 print "- **"count" "plural"** — "$0
               }' >> CONTRIBUTORS.md
 
-      - uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5  # v9
-        with:
-          author_name: GitHub-Action
-          message: "chore: bump dependencies and update contributors"
-
-      - name: Check for new commits
-        id: check_commits
-        run: |
-          if [ "$(git rev-parse --short HEAD)" != "${{ steps.head_before.outputs.sha }}" ]; then
-            echo "has_commits=1" >> $GITHUB_OUTPUT
-          else
-            echo "has_commits=0" >> $GITHUB_OUTPUT
-          fi
-
       - name: Extract Version
         id: extract_version
-        if: steps.check_commits.outputs.has_commits == '1'
         shell: nu {0}
         run: |
           open Cargo.toml | get package.version | str trim | let version: string
           $"version=($version)" | save --force $env.GITHUB_OUTPUT
 
-      - name: Push Tag
-        if: steps.check_commits.outputs.has_commits == '1'
-        run: |
-          git tag v${{ steps.extract_version.outputs.version }}
-          git push origin v${{ steps.extract_version.outputs.version }}
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: bump dependencies to ${{ steps.extract_version.outputs.version }} and update contributors"
+          title: "chore: update dependencies to v${{ steps.extract_version.outputs.version }}"
+          body: "Automated PR to update Nushell dependencies and contributors."
+          branch: "chore/update-dependencies"
+          author: "GitHub-Action <action@github.com>"
+          labels: "dependencies"

@@ -58,6 +58,7 @@ def download_and_install [url: string, filename: string, install_root: path, nam
         http-get-with-retry $url 3 30sec | save $archive_path
     } catch {
         log warning "failed to download artifact"
+        rm -rf $tmp_dir
         return false
     }
 
@@ -84,6 +85,7 @@ def download_and_install [url: string, filename: string, install_root: path, nam
         }
     } catch {
         log warning "failed to extract artifact"
+        rm -rf $tmp_dir
         return false
     }
 
@@ -92,6 +94,7 @@ def download_and_install [url: string, filename: string, install_root: path, nam
 
     if ($found | is-empty) {
         log warning $"binary ($bin_name) not found in archive"
+        rm -rf $tmp_dir
         return false
     }
 
