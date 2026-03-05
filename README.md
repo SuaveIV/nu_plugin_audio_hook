@@ -324,6 +324,10 @@ curl --proto '=https' --tlsv1.2 -LsSf https://github.com/SuaveIV/nu_plugin_audio
 plugin add ~/.cargo/bin/nu_plugin_audio
 ```
 
+> **Note:** The shell installer covers x86_64 Linux, x86_64 macOS, and ARM64 macOS (Apple Silicon).
+> ARM64 Linux (`aarch64-unknown-linux-gnu`) is not included in the installer — use the
+> [Manual Download](#manual-download) or [`cargo install`](#cargo-install) method instead.
+
 ### PowerShell Installer (Windows)
 
 No Rust toolchain required. Run this in PowerShell, then register the plugin in Nushell:
@@ -361,6 +365,18 @@ Download the prebuilt binary for your platform from the [Releases page](https://
 ```nushell
 plugin add path/to/nu_plugin_audio
 ```
+
+Prebuilt binaries are available for the following targets:
+
+| Target | Notes |
+| --- | --- |
+| `x86_64-unknown-linux-gnu` | x86_64 Linux |
+| `aarch64-unknown-linux-gnu` | ARM64 Linux — built with `--features=all-decoders` |
+| `x86_64-apple-darwin` | x86_64 macOS |
+| `aarch64-apple-darwin` | ARM64 macOS (Apple Silicon) |
+| `x86_64-pc-windows-msvc` | x86_64 Windows |
+
+Each archive has a matching `.sha256` checksum file on the release page.
 
 ### Compile from Source
 
