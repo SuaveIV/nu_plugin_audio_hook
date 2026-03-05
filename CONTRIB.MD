@@ -134,6 +134,13 @@ The tag push then triggers the release CI, which builds platform binaries via ca
 
 ---
 
+## Just
+
+This project uses a [`Justfile`](Justfile) for common tasks. If you have [just](https://github.com/casey/just) installed:
+```just --list``` to see all available recipes.
+
+The most useful ones for contributors are `just check` before committing and `just install` to test a local build in Nushell.
+
 ## Contributors
 
 See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the full list of people who have contributed to this project.
