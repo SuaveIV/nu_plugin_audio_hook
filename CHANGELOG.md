@@ -5,19 +5,56 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.2.1 (2026-03-04)
+
+### Documentation
+
+ - <csr-id-ccdb7d2d0e87bfe10420b5e3fff68f52d378fdc9/> add CONTRIBUTING.md to guide new contributors
+
+### New Features
+
+ - <csr-id-1b6fcda80fa803fbe4d9263400c71337e6ebfcc7/> bump version to 0.2.1
+ - <csr-id-a1e095631655da6915593f1bc064432cc0d01d34/> update README and metadata for version 0.2.0; improve code formatting and error handling
+
+### Refactor
+
+ - <csr-id-a2eda3f6b11eaefc0235efc777f8531b34f334c0/> simplify return statements and improve code readability in SoundBeepCmd and generate_wav functions
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 4 commits contributed to the release.
+ - 4 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 0 issues like '(#ID)' were seen in commit messages
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Bump version to 0.2.1 ([`1b6fcda`](https://github.com/SuaveIV/nu_plugin_audio/commit/1b6fcda80fa803fbe4d9263400c71337e6ebfcc7))
+    - Simplify return statements and improve code readability in SoundBeepCmd and generate_wav functions ([`a2eda3f`](https://github.com/SuaveIV/nu_plugin_audio/commit/a2eda3f6b11eaefc0235efc777f8531b34f334c0))
+    - Add CONTRIBUTING.md to guide new contributors ([`ccdb7d2`](https://github.com/SuaveIV/nu_plugin_audio/commit/ccdb7d2d0e87bfe10420b5e3fff68f52d378fdc9))
+    - Update README and metadata for version 0.2.0; improve code formatting and error handling ([`a1e0956`](https://github.com/SuaveIV/nu_plugin_audio/commit/a1e095631655da6915593f1bc064432cc0d01d34))
+</details>
+
 ## v0.2.0 (2026-03-04)
 
 ### New Features
 
+<csr-id-31dc072bafe4c903487d5b2f48525910c73e2ddf/>
+<csr-id-15a1da7df713bf2f8267a7517f18840f9b74834d/>
+
  - <csr-id-46cfd591cc1bb53ecf602fc36a8c02695cfdc714/> enhance audio playback support and improve WAV generation
  - <csr-id-c79d8d369c286a89a3f52177c622f43e1cbcd91e/> update dependencies and enhance audio handling
    - Updated `rodio` dependency version from 0.21.1 to 0.22.1 in Cargo.toml.
-   - Changed `OutputStreamBuilder` to `DeviceSinkBuilder` for audio output stream handling.
-   - Updated audio source handling to use `Player` instead of `Sink`.
-   - Adjusted sample rate and channel retrieval to use the new API methods.
-   - Enhanced sine wave generation and playback functionality with updated types.
- - <csr-id-31dc072bafe4c903487d5b2f48525910c73e2ddf/> restore pre-build steps for aarch64 target in Cross.toml
- - <csr-id-15a1da7df713bf2f8267a7517f18840f9b74834d/> add pre-build steps for aarch64 target in Cross.tonl
+- Changed `OutputStreamBuilder` to `DeviceSinkBuilder` for audio output stream handling.
+- Updated audio source handling to use `Player` instead of `Sink`.
+- Adjusted sample rate and channel retrieval to use the new API methods.
+- Enhanced sine wave generation and playback functionality with updated types.
 
 ### Bug Fixes
 
@@ -30,8 +67,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 5 commits contributed to the release.
- - 5 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 10 commits contributed to the release.
+ - 8 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
 ### Commit Details
@@ -41,14 +78,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release nu_plugin_audio v0.2.0 ([`50e1c47`](https://github.com/SuaveIV/nu_plugin_audio/commit/50e1c47930835cd9b5c9ec7464e5cf299f1a0794))
     - Restore pre-build steps for aarch64 target in Cross.toml ([`31dc072`](https://github.com/SuaveIV/nu_plugin_audio/commit/31dc072bafe4c903487d5b2f48525910c73e2ddf))
     - Disable build-arm64 job in release workflow ([`c162891`](https://github.com/SuaveIV/nu_plugin_audio/commit/c1628912cd9fee2c43bd546b67afd7b6447a1dcd))
     - Add pre-build steps for aarch64 target in Cross.tonl ([`15a1da7`](https://github.com/SuaveIV/nu_plugin_audio/commit/15a1da7df713bf2f8267a7517f18840f9b74834d))
     - Update cross installation command to remove version specification ([`54f309d`](https://github.com/SuaveIV/nu_plugin_audio/commit/54f309d802c84c6f28ff4874a36305ddd64b2091))
     - Update release workflow to use input tag for packaging and uploading ([`8d300a0`](https://github.com/SuaveIV/nu_plugin_audio/commit/8d300a0ebcb3a5b6db189a749cbe3048dbd6106c))
+    - Adjust release workflow to handle pull requests and improve tag handling ([`82d461e`](https://github.com/SuaveIV/nu_plugin_audio/commit/82d461e5d751b16791c2536d6ffb382dbbcbf872))
+    - Merge pull request #7 from SuaveIV/rodio_update ([`51f8cd5`](https://github.com/SuaveIV/nu_plugin_audio/commit/51f8cd5d64e91785f8a10f18e019aa4062fca586))
+    - Enhance audio playback support and improve WAV generation ([`46cfd59`](https://github.com/SuaveIV/nu_plugin_audio/commit/46cfd591cc1bb53ecf602fc36a8c02695cfdc714))
+    - Update dependencies and enhance audio handling ([`c79d8d3`](https://github.com/SuaveIV/nu_plugin_audio/commit/c79d8d369c286a89a3f52177c622f43e1cbcd91e))
 </details>
 
+<csr-unknown>
+ restore pre-build steps for aarch64 target in Cross.toml add pre-build steps for aarch64 target in Cross.tonl<csr-unknown/>
+
 ## v0.1.0 (2026-03-03)
+
+<csr-id-43528fc4d388c45aebd99bf178f7251085f1dabe/>
 
 ### Chore
 
@@ -74,6 +121,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 </details>
 
 ## v0.111.0-test.1 (2026-03-03)
+
+<csr-id-7f93b35850a9d3ff5a6863e07fba39a1a5513a1d/>
+<csr-id-c1c286ac414b18310e699856e77f9b021989c6bb/>
+<csr-id-8301c35d75314be1c3159c436c3c285a81cad1d4/>
+<csr-id-4ef01757bb9ede3c70429653c86c76513c894508/>
 
 ### Documentation
 
@@ -140,6 +192,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.111.0 (2026-03-03)
 
+<csr-id-37d73dff2fccb240b449a0cb8735e9cc84058dc7/>
+<csr-id-20822a1287b050b8c093daa38a355a03fb1639b1/>
+<csr-id-18bb887257f46def5650105ac9b05d6e5287dfe4/>
+<csr-id-96e495a96b6a7caa7698545d081addc0887db9a5/>
+<csr-id-23da40b935119528871e06950ed6e0ea264c6e73/>
+<csr-id-bac83c5ef4ee78eb96cfa3c82abe694cac927c77/>
+<csr-id-4539614f120b7b5bdec4330706f4f048a223ede6/>
+<csr-id-0f09882df564029b14cdd0893214988c7de2b64d/>
+<csr-id-79412a36e5f154ade35215826dda808c69d2a7fa/>
+<csr-id-4ff643243ff994adaec17710648f9528759f9030/>
+<csr-id-4909d55a260d298f75f9115240d6463e3adba238/>
+<csr-id-18582856c3b49d6c4cbe553959b57768366749f7/>
+<csr-id-d6295e248a1eef439e08d3adeef144e0f20bc480/>
+<csr-id-b618985a0ac521caa566cbeca7fa03d3e9bb1a13/>
+
 ### Chore
 
  - <csr-id-37d73dff2fccb240b449a0cb8735e9cc84058dc7/> bump dependencies and update contributors
@@ -160,113 +227,106 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - <csr-id-b45e901d21f3bf7b4ce3507cf6d173398aa7c189/> update README with playback display, controls, and format support table
  - <csr-id-a99cff6faa92a00a8dc1162ca75d57a1128c794f/> update README with new features and fixes
    - Add `sound make --data` example for saving generated tones to WAV files
-   - Add `sound play --amplify` examples for volume control
-   - Update `sound meta` example output to include size, format, sample_rate, and channels
-   - Add `--locked` flag to all cargo install/build commands due to upstream dependency issue
-   - Fix markdownlint warnings (MD040, MD036, MD012)
+- Add `sound play --amplify` examples for volume control
+- Update `sound meta` example output to include size, format, sample_rate, and channels
+- Add `--locked` flag to all cargo install/build commands due to upstream dependency issue
+- Fix markdownlint warnings (MD040, MD036, MD012)
 
 ### New Features
 
+<csr-id-e84d51fc0df6fbb3a5c2e5b792e000315ce8b29c/>
+<csr-id-bd0168c63ca7daa4dd5b236eaafe235d79f10a20/>
+
  - <csr-id-9e71bea71ac2fb76fa3a569b0dd292ed13a80aea/> expand TAG_MAP, expose FileProperties, artwork, and fix duration
    - TAG_MAP: HashMap → BTreeMap; add 22 new keys (comment, lyrics, label,
-     producer, remixer, replaygain_*, compilation, barcode, script, etc.)
-   - sound meta: expose bitrate, audio_bitrate, bit_depth from FileProperties;
+   producer, remixer, replaygain_*, compilation, barcode, script, etc.)
+- sound meta: expose bitrate, audio_bitrate, bit_depth from FileProperties;
      expose embedded artwork as a list of {pic_type, mime_type, size} records;
      key lookup is now case-insensitive; insert_text failure returns LabeledError
-   - Duration: formatted as H:MM:SS string in both sound meta output and the
+- Duration: formatted as H:MM:SS string in both sound meta output and the
      progress bar; audio_player falls back to lofty FileProperties duration so
      minimp3 files no longer need a manual -d flag
-   - README: updated example output, artwork/ReplayGain examples, full key
+- README: updated example output, artwork/ReplayGain examples, full key
      reference table, removed stale $in.duration pipeline example
- - <csr-id-e84d51fc0df6fbb3a5c2e5b792e000315ce8b29c/> add interactive audio player with rich progress display
-   - Add live progress bar to `sound play` with elapsed/total time tracking.
-   - Add interactive keyboard controls for files longer than 1 minute:
+- Add live progress bar to `sound play` with elapsed/total time tracking.
+- Add interactive keyboard controls for files longer than 1 minute:
      - Space to toggle play/pause
      - Left/Right (or h/l) to seek
      - Up/Down (or k/j) to adjust volume
      - 'm' to toggle mute
      - 'q' or Esc to quit
-   - Add visual volume bar and dynamic terminal width scaling.
-   - Add Nerd Font support via `--nerd-fonts` flag or `NERD_FONTS` env var, featuring smooth sub-character rendering.
-   - Add `--no-progress` flag to suppress output for background use.
-   - Fix busy-wait loop by replacing it with a sleep-based tick.
- - <csr-id-bd0168c63ca7daa4dd5b236eaafe235d79f10a20/> Add volume control to sound play and make
-   - The '--amplify' flag is now available for 'sound play' to adjust playback volume. I also updated 'sound make' to clarify that its existing amplify flag can be used to make sounds quieter by using values below 1.0.
+- Left/Right (or h/l) to seek
+- Up/Down (or k/j) to adjust volume
+- 'm' to toggle mute
+- 'q' or Esc to quit
+- The '--amplify' flag is now available for 'sound play' to adjust playback volume. I also updated 'sound make' to clarify that its existing amplify flag can be used to make sounds quieter by using values below 1.0.
 
 ### Bug Fixes
+
+<csr-id-2df0c9230724b0545096bfeb742f0ab68ff7170a/>
+<csr-id-ff24e05e3dd03944d5580e4ffbb7e0a58a38d264/>
+<csr-id-b24841936746732faf879c5769d841158a3c924c/>
+<csr-id-ed5f34422c415a3e63d3a1cd054baa382062910b/>
+<csr-id-f30e460c481882501cd64177a800843f4cbd846b/>
+<csr-id-d72f14dd22def9f359c23635b2aea3187f8e3939/>
+<csr-id-b964eb009777bea33a7e5167356cae66f3e61c71/>
+<csr-id-2d73711822d1c8ec1c777c6ea527a77bd6d863bf/>
+<csr-id-e085674ee0c3a6c0dbe89f42fca14001fd7000b0/>
+<csr-id-624c183913cfe3b8c7bb3c05df3444140bcff7bf/>
+<csr-id-e3d43c8d570c06fc753bb8694bbbf7130f344a8c/>
+<csr-id-6f3f4c0d6336fc925bf2a8c4aec7955b1e01bf44/>
+<csr-id-ab0613dc35334f009e4b257291b5fcaec498d9d7/>
+<csr-id-a63143ae4de82100a4584ad42bbd0f2cc09cc315/>
+<csr-id-9a064c2d9b7d056c1ac8581214775f8edc5b7501/>
+<csr-id-da1fff2ca4e2fde047be672b6efe9438d9afb3bd/>
+<csr-id-741a149f8126fe8a64438a8977bc977d7a1072a1/>
+<csr-id-fd81afde55c82f5904372ddfa902a585092b0d6d/>
+<csr-id-07f095a291d49678aa45a493eeb6cc5ebe0faa5b/>
+<csr-id-43a3e1a92791712f725f32f25e182c9a77d5c4e7/>
+<csr-id-e3a9c860bcfb1116a310ef6bef275157d4da91cb/>
+<csr-id-375bc65f9d47978161a0f978216a0247817a3e39/>
+<csr-id-8bde4e2eda666731aad62d58229fb087afce5ddd/>
+<csr-id-df6d0b22d81511f38eb098350ce62ae072f5b988/>
+<csr-id-71d0a4c79f65594f8d52a2187d92b49e039e5f7d/>
+<csr-id-c8f00e68cc05a38542eac351c7f2a4223a57720b/>
+<csr-id-3aee04039914ea0dad5a8d9feffead93d1b4fff4/>
+<csr-id-416655971a94f73b189b3a683303c602d41d3e14/>
 
  - <csr-id-5fdd4d3ac0348b285cd723b7c5a1b65dd181c6ee/> update dependencies to latest versions and clean up Cargo.lock
  - <csr-id-274bfc72ca8597f3c80f6ffebf265da9d69d2a5a/> unblock dependency updates and secure workflow
    - Remove explicit interprocess=2.2.1 pin from workflow and Cargo.toml
-   - Add explicit contents: write permission block
-   - Pin GitHub actions to exact commit SHAs to prevent supply chain attacks
- - <csr-id-2df0c9230724b0545096bfeb742f0ab68ff7170a/> command string formatting in build.nu
- - <csr-id-ff24e05e3dd03944d5580e4ffbb7e0a58a38d264/> improve error handling in audio metadata parsing and update dependency version extraction
- - <csr-id-b24841936746732faf879c5769d841158a3c924c/> add publisher alias in README and improve error handling in audio metadata parsing
- - <csr-id-ed5f34422c415a3e63d3a1cd054baa382062910b/> correct duration format in README and improve error handling in audio metadata parsing
- - <csr-id-f30e460c481882501cd64177a800843f4cbd846b/> address review findings across meta, player, constants, and README
-   - README: replace '...' size placeholder in FLAC example with '42.3 MiB'
-   - utils: extract shared pub format_duration (M:SS / H:MM:SS) used by both
+- Add explicit contents: write permission block
+- Pin GitHub actions to exact commit SHAs to prevent supply chain attacks
+- README: replace '...' size placeholder in FLAC example with '42.3 MiB'
+- utils: extract shared pub format_duration (M:SS / H:MM:SS) used by both
      audio_meta and audio_player, eliminating duplicate implementations
-   - audio_meta: add (Type::Binary, Type::Record) to input_output_types so
+- audio_meta: add (Type::Binary, Type::Record) to input_output_types so
      nushell routes binary pipeline input to the existing unsupported-input guard
-   - audio_meta: thread lofty container-header duration through parse_tags →
+- audio_meta: thread lofty container-header duration through parse_tags →
      parse_meta → parse_stream_meta as a fallback; use source.total_duration()
      .or(lofty_duration) so minimp3 files no longer emit Value::nothing for
      the duration field when lofty can supply it
-   - audio_player: replace misleading piped example
+- audio_player: replace misleading piped example
      ('sound meta audio.mp3 | sound play audio.mp3') with a correct standalone
      usage ('sound play audio.mp3'); _input is not consumed by play_audio
-   - audio_player: consolidate two lofty::read_from_path(&path) calls into one
+- audio_player: consolidate two lofty::read_from_path(&path) calls into one
      tagged_file_res, deriving both (title, artist) and source_duration from it
-   - constants: add 'publisher' alias for ItemKey::Publisher alongside a comment
+- constants: add 'publisher' alias for ItemKey::Publisher alongside a comment
      explaining the Vorbis/TXXX 'organization' convention
- - <csr-id-d72f14dd22def9f359c23635b2aea3187f8e3939/> coerce vec to boxed slice for Type::Record in input_output_types
-   `nu-protocol 0.110.0` expects `Box<[(String, Type)]>` not `Vec` — appending `.into()` to the empty vec literals satisfies the type checker.
- - <csr-id-b964eb009777bea33a7e5167356cae66f3e61c71/> change cargo build to cargo check in dependency update workflow
- - <csr-id-2d73711822d1c8ec1c777c6ea527a77bd6d863bf/> sanitize plugin version in dependency update workflow
- - <csr-id-e085674ee0c3a6c0dbe89f42fca14001fd7000b0/> inline dep bump script and pin interprocess to =2.2.1
- - <csr-id-624c183913cfe3b8c7bb3c05df3444140bcff7bf/> downgrade interprocess to version 2.2.1
- - <csr-id-e3d43c8d570c06fc753bb8694bbbf7130f344a8c/> prevent flicker and make header responsive
- - <csr-id-6f3f4c0d6336fc925bf2a8c4aec7955b1e01bf44/> optimize header rendering and clear progress line to reduce flicker
- - <csr-id-ab0613dc35334f009e4b257291b5fcaec498d9d7/> improve progress header display and handle truncation
- - <csr-id-a63143ae4de82100a4584ad42bbd0f2cc09cc315/> stop progress bar from flickering
-   Interleaved write!/queue! calls were letting the OS render partial frames
-   before the flush. The whole frame is now buffered and sent in one write_all.
-   
-   Also fixed the artist/title header, which was printed once and abandoned —
-   cursor movement around the progress line below it caused visual noise. Both
-   lines are now redrawn together on every frame using a first_render flag to
-   reserve the two-line region on the initial draw.
- - <csr-id-9a064c2d9b7d056c1ac8581214775f8edc5b7501/> harden CI workflow, fix bar overflow, update unicode-width
-   CI / security:
-   - Pin bump-script URL to full 40-char SHA (2b1f155…270f8)
-   - Pin softprops/action-gh-release to v2.5.0 SHA (a06a81a)
-   - Pin EndBug/add-and-commit to v9 SHA (a94899b)
-   - Remove -e from git shortlog to stop leaking contributor emails
- - <csr-id-da1fff2ca4e2fde047be672b6efe9438d9afb3bd/> remove dead code, guard codec overrun, skip narrow terminals
-   - Remove unused last_position variable (declared and written but never read)
-   - Cap sink.get_pos() with .min(total) so codecs that briefly report a
+- Pin bump-script URL to full 40-char SHA (2b1f155…270f8)
+- Pin softprops/action-gh-release to v2.5.0 SHA (a06a81a)
+- Pin EndBug/add-and-commit to v9 SHA (a94899b)
+- Remove -e from git shortlog to stop leaking contributor emails
+- Remove unused last_position variable (declared and written but never read)
+- Cap sink.get_pos() with .min(total) so codecs that briefly report a
      position beyond the stream duration don't prematurely trigger the
      end-of-track break or clamp the bar to 100%
-   - Add MIN_RENDER_WIDTH (40) guard at the top of render_progress to silently
+- Add MIN_RENDER_WIDTH (40) guard at the top of render_progress to silently
      skip rendering on very narrow terminals instead of printing wrapped garbage
- - <csr-id-741a149f8126fe8a64438a8977bc977d7a1072a1/> update playback command description to include 5s seeking functionality
- - <csr-id-fd81afde55c82f5904372ddfa902a585092b0d6d/> update Nushell setup action to version 3
- - <csr-id-07f095a291d49678aa45a493eeb6cc5ebe0faa5b/> enhance character width handling and improve progress display logic
- - <csr-id-43a3e1a92791712f725f32f25e182c9a77d5c4e7/> improve playback logic, display rendering, and workflow stability
- - <csr-id-e3a9c860bcfb1116a310ef6bef275157d4da91cb/> change env_logger initialization to try_init for safer logging setup
- - <csr-id-375bc65f9d47978161a0f978216a0247817a3e39/> improve error handling for negative and invalid duration values in load_values function
- - <csr-id-8bde4e2eda666731aad62d58229fb087afce5ddd/> correct key name for recording year in ID3_HASHMAP
- - <csr-id-df6d0b22d81511f38eb098350ce62ae072f5b988/> update audio file references in metadata commands and examples
- - <csr-id-71d0a4c79f65594f8d52a2187d92b49e039e5f7d/> Windows file locking, improve WAV safety, and enhance error handling
-   - Fix Windows file locking by dropping read handles before writing tags.
-   - Add overflow protection to WAV header generation.
-   - Handle missing duration gracefully and improve error messages.
-   - Add `log` dependency.
- - <csr-id-c8f00e68cc05a38542eac351c7f2a4223a57720b/> remove print in stderr for `sound play`
- - <csr-id-3aee04039914ea0dad5a8d9feffead93d1b4fff4/> disable OutputStream log on drop
- - <csr-id-416655971a94f73b189b3a683303c602d41d3e14/> quote paths so they can contain spaces
+- Fix Windows file locking by dropping read handles before writing tags.
+- Add overflow protection to WAV header generation.
+- Handle missing duration gracefully and improve error messages.
+- Add `log` dependency.
 
 ### Other
 
@@ -412,6 +472,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Commit from GitHub Actions (Update dependencies) ([`3460019`](https://github.com/SuaveIV/nu_plugin_audio/commit/3460019b15d32acd84c2c3efb9a71d6463fb5dfd))
 </details>
 
+<csr-unknown>
+ add interactive audio player with rich progress displayAdd visual volume bar and dynamic terminal width scaling.Add Nerd Font support via --nerd-fonts flag or NERD_FONTS env var, featuring smooth sub-character rendering.Add --no-progress flag to suppress output for background use.Fix busy-wait loop by replacing it with a sleep-based tick. Add volume control to sound play and make command string formatting in build.nu improve error handling in audio metadata parsing and update dependency version extraction add publisher alias in README and improve error handling in audio metadata parsing correct duration format in README and improve error handling in audio metadata parsing address review findings across meta, player, constants, and README coerce vec to boxed slice for Type::Record in input_output_typesnu-protocol 0.110.0 expects Box<[(String, Type)]> not Vec — appending .into() to the empty vec literals satisfies the type checker. change cargo build to cargo check in dependency update workflow sanitize plugin version in dependency update workflow inline dep bump script and pin interprocess to =2.2.1 downgrade interprocess to version 2.2.1 prevent flicker and make header responsive optimize header rendering and clear progress line to reduce flicker improve progress header display and handle truncation stop progress bar from flickeringInterleaved write!/queue! calls were letting the OS render partial framesbefore the flush. The whole frame is now buffered and sent in one write_all.Also fixed the artist/title header, which was printed once and abandoned —cursor movement around the progress line below it caused visual noise. Bothlines are now redrawn together on every frame using a first_render flag toreserve the two-line region on the initial draw. harden CI workflow, fix bar overflow, update unicode-widthCI / security: remove dead code, guard codec overrun, skip narrow terminals update playback command description to include 5s seeking functionality update Nushell setup action to version 3 enhance character width handling and improve progress display logic improve playback logic, display rendering, and workflow stability change env_logger initialization to try_init for safer logging setup improve error handling for negative and invalid duration values in load_values function correct key name for recording year in ID3_HASHMAP update audio file references in metadata commands and examples Windows file locking, improve WAV safety, and enhance error handling remove print in stderr for sound play disable OutputStream log on drop quote paths so they can contain spaces<csr-unknown/>
+
 ## v0.109.1 (2025-12-03)
 
 ### Commit Statistics
@@ -546,6 +609,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 </details>
 
 ## v0.106.1 (2025-08-03)
+
+<csr-id-98ab6aaf1a776a189e318950b9486a7689907155/>
+<csr-id-45bd16201b4d9918fe86fa820ea07026f94caab9/>
+<csr-id-9119a1d3f8c6c64a96aea770b20ed0013a8dafbc/>
+<csr-id-a67c093edcf0e9005f134e2d821a44ff8420f092/>
+<csr-id-4a0ef45f94b01cc069220e039778be31ff1d0cc8/>
+<csr-id-e2061a932043792ca517478a367f6eb991d56c05/>
+<csr-id-7500966cb46bdc9736f40e881f41fe1b7fc0d74e/>
+<csr-id-e3bad554084913238986cd3621eaeef10ce493ea/>
+<csr-id-1c3a1b798dc0875af9dded383aa143e3566652b2/>
+<csr-id-9a7d7d23d0aeffa11a154887541dcde17344d763/>
+<csr-id-40518de058b294cbb23348d2a09253c340d8716a/>
+<csr-id-6fde8d3a232bff33b8985ccfdf5018834f58d7ac/>
+<csr-id-2f778866fa580367000b7125d66cef4940e4f931/>
+<csr-id-4d02c133629c429b164f97bf846b9f5f12ef8a50/>
+<csr-id-f71f448a430baf778d7a848bf1c1d232490933ee/>
+<csr-id-6a640e8ff5a6fd833937af9628916d487a138062/>
+<csr-id-fc21199bd842e3f74c57568879adc91630162156/>
+<csr-id-332e1232c820905a460f1d8e120bd87988779b09/>
+<csr-id-d73259f2473e79653f11890091a7af5b789a1230/>
+<csr-id-5aa55fb893fd0e952158cf8b269063c393a27701/>
 
 ### Chore
 
@@ -709,6 +793,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 </details>
 
 ## v0.1.1 (2023-11-07)
+
+<csr-id-0e2b1039d49a088f0f9de18585019ff0b642d313/>
 
 ### Other
 
