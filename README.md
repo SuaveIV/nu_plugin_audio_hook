@@ -1,6 +1,8 @@
 # nu_plugin_audio
 
 [![Nushell](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FSuaveIV%2Fnu_plugin_audio%2Fmain%2FCargo.toml&query=%24.dependencies%5B%22nu-plugin%22%5D.version&label=nushell&color=blue&logo=nushell)](https://www.nushell.sh/)
+[![crates.io](https://img.shields.io/crates/v/nu_plugin_audio.svg)](https://crates.io/crates/nu_plugin_audio)
+[![Downloads](https://img.shields.io/crates/d/nu_plugin_audio.svg)](https://crates.io/crates/nu_plugin_audio)
 
 A [Nushell](https://www.nushell.sh/) plugin to generate and play sounds. It supports tone generation, metadata manipulation, and playback for multiple audio formats.
 
@@ -336,8 +338,19 @@ plugin add ($env.USERPROFILE | path join ".cargo" "bin" "nu_plugin_audio.exe")
 
 ### cargo-binstall
 
+Installs a prebuilt binary from the GitHub release, falling back to a source build automatically:
+
 ```nushell
 cargo binstall nu_plugin_audio
+plugin add ~/.cargo/bin/nu_plugin_audio
+```
+
+### cargo install
+
+Builds from source using the published crate on [crates.io](https://crates.io/crates/nu_plugin_audio):
+
+```nushell
+cargo install nu_plugin_audio --locked
 plugin add ~/.cargo/bin/nu_plugin_audio
 ```
 
@@ -399,6 +412,8 @@ Users who want a smaller binary can build with the `lite` feature, which only in
 ```bash
 cargo build -r --locked --no-default-features --features=lite
 ```
+
+> **Note:** `cargo install` always uses the `default` feature set. Custom features require a source build.
 
 ---
 

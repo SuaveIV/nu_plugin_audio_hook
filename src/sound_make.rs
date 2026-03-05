@@ -1,8 +1,7 @@
 use nu_plugin::{EvaluatedCall, SimplePluginCommand};
 use nu_protocol::{Category, Example, LabeledError, Signature, Span, SyntaxShape, Value};
 use rodio::source::{SineWave, Source};
-use rodio::{DeviceSinkBuilder
-, Player};
+use rodio::{DeviceSinkBuilder, Player};
 
 use std::time::Duration;
 
@@ -112,10 +111,9 @@ impl SimplePluginCommand for SoundBeepCmd {
 fn make_sound(call: &EvaluatedCall) -> Result<Value, LabeledError> {
     let (frequency_value, duration_value, amplify_value) = load_values(call)?;
 
-    if call
-        .has_flag("data")
-        .map_err(|e| LabeledError::new(e.to_string()).with_label("checking 'data' flag", call.head))?
-    {
+    if call.has_flag("data").map_err(|e| {
+        LabeledError::new(e.to_string()).with_label("checking 'data' flag", call.head)
+    })? {
         let wav_data = generate_wav(frequency_value, duration_value, amplify_value)?;
         Ok(Value::binary(wav_data, call.head))
     } else {
@@ -129,8 +127,7 @@ fn sine_wave(
     duration_value: Duration,
     amplify_value: f32,
 ) -> Result<(), LabeledError> {
-    let mut stream_handle = DeviceSinkBuilder
-::open_default_sink().map_err(|err| {
+    let mut stream_handle = DeviceSinkBuilder::open_default_sink().map_err(|err| {
         LabeledError::new(err.to_string()).with_label("audio stream exception", Span::unknown())
     })?;
 
@@ -145,11 +142,7 @@ fn sine_wave(
     Ok(())
 }
 
-fn generate_wav(
-    frequency: f32,
-    duration: Duration,
-    amplify: f32,
-) -> Result<Vec<u8>, LabeledError> {
+fn generate_wav(frequency: f32, duration: Duration, amplify: f32) -> Result<Vec<u8>, LabeledError> {
     let source = SineWave::new(frequency)
         .take_duration(duration)
         .amplify(amplify as _);
@@ -163,19 +156,22 @@ fn generate_wav(
     let bits_per_sample = 16u16;
     let byte_rate_u64 = sample_rate as u64 * num_channels as u64 * bits_per_sample as u64 / 8;
     if byte_rate_u64 > u32::MAX as u64 {
-        return Err(LabeledError::new("WAV header overflow").with_label("byte_rate exceeds u32", Span::unknown()));
+        return Err(LabeledError::new("WAV header overflow")
+            .with_label("byte_rate exceeds u32", Span::unknown()));
     }
     let byte_rate = byte_rate_u64 as u32;
 
     let block_align_u64 = num_channels as u64 * bits_per_sample as u64 / 8;
     if block_align_u64 > u16::MAX as u64 {
-        return Err(LabeledError::new("WAV header overflow").with_label("block_align exceeds u16", Span::unknown()));
+        return Err(LabeledError::new("WAV header overflow")
+            .with_label("block_align exceeds u16", Span::unknown()));
     }
     let block_align = block_align_u64 as u16;
 
     let subchunk2_size_u64 = samples.len() as u64 * bits_per_sample as u64 / 8;
     if subchunk2_size_u64 > u32::MAX as u64 {
-        return Err(LabeledError::new("WAV data too large").with_label("exceeds u32 limit", Span::unknown()));
+        return Err(LabeledError::new("WAV data too large")
+            .with_label("exceeds u32 limit", Span::unknown()));
     }
     let subchunk2_size = subchunk2_size_u64 as u32;
 
@@ -232,7 +228,8 @@ fn load_values(call: &EvaluatedCall) -> Result<(f32, Duration, f32), LabeledErro
     let duration_value = match duration {
         Value::Duration { val, .. } => {
             if val < 0 {
-                return Err(LabeledError::new("Negative duration").with_label("Negative duration", dur_span));
+                return Err(LabeledError::new("Negative duration")
+                    .with_label("Negative duration", dur_span));
             }
             Duration::from_nanos(val as u64)
         }
@@ -248,8 +245,9 @@ fn load_values(call: &EvaluatedCall) -> Result<(f32, Duration, f32), LabeledErro
             None => Value::float(1.0, call.head),
         },
         Err(err) => {
-            return Err(LabeledError::new(err.to_string())
-                .with_label("Amplify value error", call.head))
+            return Err(
+                LabeledError::new(err.to_string()).with_label("Amplify value error", call.head)
+            )
         }
     };
     let amplify_value: f32 = amplify.as_float().map_err(|err| {

@@ -15,7 +15,10 @@ use std::io::{stderr, Write};
 use std::time::{Duration, Instant};
 use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
-use crate::{utils::{format_duration, load_file}, Sound};
+use crate::{
+    utils::{format_duration, load_file},
+    Sound,
+};
 
 /// Interval for checking keyboard input.
 const KEY_POLL_INTERVAL: Duration = Duration::from_millis(200);
@@ -51,37 +54,97 @@ enum IconSet {
 
 impl IconSet {
     /// Play icon: `▶` / `>`.
-    fn play(&self)         -> &'static str { match self { Self::NerdFont => "\u{f04b}", Self::Unicode => "▶",  Self::Ascii => ">"   } }
+    fn play(&self) -> &'static str {
+        match self {
+            Self::NerdFont => "\u{f04b}",
+            Self::Unicode => "▶",
+            Self::Ascii => ">",
+        }
+    }
     /// Pause icon: `⏸` / `||`.
-    fn pause(&self)        -> &'static str { match self { Self::NerdFont => "\u{f04c}", Self::Unicode => "⏸", Self::Ascii => "||"  } }
+    fn pause(&self) -> &'static str {
+        match self {
+            Self::NerdFont => "\u{f04c}",
+            Self::Unicode => "⏸",
+            Self::Ascii => "||",
+        }
+    }
     /// Rewind / seek-back icon: `«` / `<<`.
-    fn rewind(&self)       -> &'static str { match self { Self::NerdFont => "\u{f04a}", Self::Unicode => "«",  Self::Ascii => "<<"  } }
+    fn rewind(&self) -> &'static str {
+        match self {
+            Self::NerdFont => "\u{f04a}",
+            Self::Unicode => "«",
+            Self::Ascii => "<<",
+        }
+    }
     /// Fast-forward / seek-forward icon: `»` / `>>`.
-    fn fast_forward(&self) -> &'static str { match self { Self::NerdFont => "\u{f04e}", Self::Unicode => "»",  Self::Ascii => ">>"  } }
+    fn fast_forward(&self) -> &'static str {
+        match self {
+            Self::NerdFont => "\u{f04e}",
+            Self::Unicode => "»",
+            Self::Ascii => ">>",
+        }
+    }
     /// Music note / track decoration icon.
-    fn music(&self)        -> &'static str { match self { Self::NerdFont => "\u{f001}", Self::Unicode => "♪",  Self::Ascii => "#"   } }
+    fn music(&self) -> &'static str {
+        match self {
+            Self::NerdFont => "\u{f001}",
+            Self::Unicode => "♪",
+            Self::Ascii => "#",
+        }
+    }
     /// Filled bar segment.
-    fn fill(&self)         -> &'static str { match self { Self::NerdFont => "█",        Self::Unicode => "█",  Self::Ascii => "#"   } }
+    fn fill(&self) -> &'static str {
+        match self {
+            Self::NerdFont => "█",
+            Self::Unicode => "█",
+            Self::Ascii => "#",
+        }
+    }
     /// Empty bar segment.
-    fn empty(&self)        -> &'static str { match self { Self::NerdFont => "░",        Self::Unicode => "░",  Self::Ascii => "."   } }
+    fn empty(&self) -> &'static str {
+        match self {
+            Self::NerdFont => "░",
+            Self::Unicode => "░",
+            Self::Ascii => ".",
+        }
+    }
 
     /// Volume icon — three tiers based on level.
     fn volume(&self, level: f32) -> &'static str {
         match self {
             Self::NerdFont => {
-                if level == 0.0      { "\u{f026}" } // nf-fa-volume_off
-                else if level < 0.5  { "\u{f027}" } // nf-fa-volume_down
-                else                 { "\u{f028}" } // nf-fa-volume_up
+                if level == 0.0 {
+                    "\u{f026}"
+                }
+                // nf-fa-volume_off
+                else if level < 0.5 {
+                    "\u{f027}"
+                }
+                // nf-fa-volume_down
+                else {
+                    "\u{f028}"
+                } // nf-fa-volume_up
             }
             Self::Unicode => {
-                if level == 0.0     { "🔇" }
-                else if level < 0.5 { "🔉" }
-                else                { "🔊" }
+                if level == 0.0 {
+                    "🔇"
+                } else if level < 0.5 {
+                    "🔉"
+                } else {
+                    "🔊"
+                }
             }
             Self::Ascii => {
-                if level == 0.0     { "[M]" } // muted
-                else if level < 0.5 { "[v]" }
-                else                { "[V]" }
+                if level == 0.0 {
+                    "[M]"
+                }
+                // muted
+                else if level < 0.5 {
+                    "[v]"
+                } else {
+                    "[V]"
+                }
             }
         }
     }
@@ -208,7 +271,12 @@ fn play_audio(engine: &EngineInterface, call: &EvaluatedCall) -> Result<(), Labe
         .as_ref()
         .ok()
         .and_then(|tf| tf.primary_tag())
-        .map(|tag| (tag.title().map(|s| s.to_string()), tag.artist().map(|s| s.to_string())))
+        .map(|tag| {
+            (
+                tag.title().map(|s| s.to_string()),
+                tag.artist().map(|s| s.to_string()),
+            )
+        })
         .unwrap_or((None, None));
 
     // Volume is now set on the Player rather than baked into the source with
@@ -246,7 +314,16 @@ fn play_audio(engine: &EngineInterface, call: &EvaluatedCall) -> Result<(), Labe
         wait_silent(engine, call, &sink, sleep_duration)
     } else {
         let icon_set = resolve_icon_set(call);
-        wait_with_progress(engine, call, &sink, sleep_duration, initial_volume, icon_set, title, artist)
+        wait_with_progress(
+            engine,
+            call,
+            &sink,
+            sleep_duration,
+            initial_volume,
+            icon_set,
+            title,
+            artist,
+        )
     }
 }
 
@@ -261,7 +338,7 @@ fn play_audio(engine: &EngineInterface, call: &EvaluatedCall) -> Result<(), Labe
 ///   4. ASCII fallback
 fn resolve_icon_set(call: &EvaluatedCall) -> IconSet {
     let flag = call.has_flag("nerd-fonts").unwrap_or(false);
-    let env  = std::env::var("NERD_FONTS")
+    let env = std::env::var("NERD_FONTS")
         .map(|v| v == "1" || v.to_lowercase() == "true")
         .unwrap_or(false);
 
@@ -318,10 +395,12 @@ fn wait_with_progress(
     let mut err = stderr();
     let interactive = total >= CONTROLS_THRESHOLD;
 
-    let mut position  = Duration::ZERO;
-    let mut last_render = Instant::now().checked_sub(RENDER_INTERVAL).unwrap_or(Instant::now());
-    let mut paused    = false;
-    let mut volume    = initial_volume;
+    let mut position = Duration::ZERO;
+    let mut last_render = Instant::now()
+        .checked_sub(RENDER_INTERVAL)
+        .unwrap_or(Instant::now());
+    let mut paused = false;
+    let mut volume = initial_volume;
     let mut pre_mute_volume = initial_volume;
     let mut first_render = true;
 
@@ -346,7 +425,8 @@ fn wait_with_progress(
     if interactive {
         if let Err(e) = enable_raw_mode() {
             let _ = execute!(err, Show);
-            return Err(LabeledError::new(e.to_string()).with_label("failed to enable raw terminal mode", call.head));
+            return Err(LabeledError::new(e.to_string())
+                .with_label("failed to enable raw terminal mode", call.head));
         }
     }
 
@@ -370,55 +450,64 @@ fn wait_with_progress(
                     if let Ok(Event::Key(KeyEvent { code, kind, .. })) = event::read() {
                         if kind == event::KeyEventKind::Press {
                             match code {
-                            // Space — toggle play/pause.
-                            KeyCode::Char(' ') => {
-                                if paused { sink.play(); paused = false; }
-                                else      { sink.pause(); paused = true; }
-                                needs_render = true;
-                            }
-                            // Right / 'l' — seek forward.
-                            KeyCode::Right | KeyCode::Char('l') => {
-                                let target = (position + SEEK_STEP).min(total);
-                                let _ = sink.try_seek(target);
-                                needs_render = true;
-                            }
-                            // Left / 'h' — seek backward.
-                            KeyCode::Left | KeyCode::Char('h') => {
-                                let target = position.saturating_sub(SEEK_STEP);
-                                let _ = sink.try_seek(target);
-                                needs_render = true;
-                            }
-                            // Up / 'k' — volume up.
-                            KeyCode::Up | KeyCode::Char('k') => {
-                                volume = (volume + VOLUME_STEP).min(VOLUME_MAX);
-                                if volume > 0.0 { pre_mute_volume = volume; }
-                                sink.set_volume(volume as _);
-                                needs_render = true;
-                            }
-                            // Down / 'j' — volume down.
-                            KeyCode::Down | KeyCode::Char('j') => {
-                                volume = (volume - VOLUME_STEP).max(0.0);
-                                if volume > 0.0 { pre_mute_volume = volume; }
-                                sink.set_volume(volume as _);
-                                needs_render = true;
-                            }
-                            // 'm' — toggle mute (sets volume to 0 / restores).
-                            KeyCode::Char('m') => {
-                                if volume > 0.0 {
-                                    pre_mute_volume = volume;
-                                    volume = 0.0;
-                                } else {
-                                    volume = pre_mute_volume.max(VOLUME_STEP);
+                                // Space — toggle play/pause.
+                                KeyCode::Char(' ') => {
+                                    if paused {
+                                        sink.play();
+                                        paused = false;
+                                    } else {
+                                        sink.pause();
+                                        paused = true;
+                                    }
+                                    needs_render = true;
                                 }
-                                sink.set_volume(volume as _);
-                                needs_render = true;
-                            }
-                            // 'q' / Escape — stop.
-                            KeyCode::Char('q') | KeyCode::Esc => {
-                                sink.stop();
-                                break;
-                            }
-                            _ => {}
+                                // Right / 'l' — seek forward.
+                                KeyCode::Right | KeyCode::Char('l') => {
+                                    let target = (position + SEEK_STEP).min(total);
+                                    let _ = sink.try_seek(target);
+                                    needs_render = true;
+                                }
+                                // Left / 'h' — seek backward.
+                                KeyCode::Left | KeyCode::Char('h') => {
+                                    let target = position.saturating_sub(SEEK_STEP);
+                                    let _ = sink.try_seek(target);
+                                    needs_render = true;
+                                }
+                                // Up / 'k' — volume up.
+                                KeyCode::Up | KeyCode::Char('k') => {
+                                    volume = (volume + VOLUME_STEP).min(VOLUME_MAX);
+                                    if volume > 0.0 {
+                                        pre_mute_volume = volume;
+                                    }
+                                    sink.set_volume(volume as _);
+                                    needs_render = true;
+                                }
+                                // Down / 'j' — volume down.
+                                KeyCode::Down | KeyCode::Char('j') => {
+                                    volume = (volume - VOLUME_STEP).max(0.0);
+                                    if volume > 0.0 {
+                                        pre_mute_volume = volume;
+                                    }
+                                    sink.set_volume(volume as _);
+                                    needs_render = true;
+                                }
+                                // 'm' — toggle mute (sets volume to 0 / restores).
+                                KeyCode::Char('m') => {
+                                    if volume > 0.0 {
+                                        pre_mute_volume = volume;
+                                        volume = 0.0;
+                                    } else {
+                                        volume = pre_mute_volume.max(VOLUME_STEP);
+                                    }
+                                    sink.set_volume(volume as _);
+                                    needs_render = true;
+                                }
+                                // 'q' / Escape — stop.
+                                KeyCode::Char('q') | KeyCode::Esc => {
+                                    sink.stop();
+                                    break;
+                                }
+                                _ => {}
                             }
                         }
                     }
@@ -426,14 +515,34 @@ fn wait_with_progress(
             }
 
             if needs_render || last_render.elapsed() >= RENDER_INTERVAL {
-                render_progress(&mut err, position, total, paused, volume, interactive, &icons, header.as_deref(), first_render);
+                render_progress(
+                    &mut err,
+                    position,
+                    total,
+                    paused,
+                    volume,
+                    interactive,
+                    &icons,
+                    header.as_deref(),
+                    first_render,
+                );
                 first_render = false;
                 last_render = Instant::now();
             }
             std::thread::sleep(KEY_POLL_INTERVAL);
         }
 
-        render_progress(&mut err, position.min(total), total, false, volume, interactive, &icons, header.as_deref(), first_render);
+        render_progress(
+            &mut err,
+            position.min(total),
+            total,
+            false,
+            volume,
+            interactive,
+            &icons,
+            header.as_deref(),
+            first_render,
+        );
         Ok::<(), LabeledError>(())
     })();
 
@@ -442,7 +551,13 @@ fn wait_with_progress(
     }
     if header.is_some() {
         let _ = execute!(err, MoveToColumn(0), Clear(ClearType::CurrentLine));
-        let _ = execute!(err, Show, MoveUp(1), MoveToColumn(0), Clear(ClearType::CurrentLine));
+        let _ = execute!(
+            err,
+            Show,
+            MoveUp(1),
+            MoveToColumn(0),
+            Clear(ClearType::CurrentLine)
+        );
     } else {
         let _ = execute!(err, Show, MoveToColumn(0), Clear(ClearType::CurrentLine));
     }
@@ -480,15 +595,15 @@ fn render_progress(
     }
 
     let elapsed_str = format_duration(elapsed);
-    let total_str   = format_duration(total);
+    let total_str = format_duration(total);
     let ratio = if total.is_zero() {
         0.0
     } else {
         (elapsed.as_secs_f64() / total.as_secs_f64()).clamp(0.0, 1.0)
     };
-    let percent     = (ratio * 100.0).round() as u8;
-    let vol_pct     = (volume.min(VOLUME_MAX) * 100.0).round() as u8;
-    let vol_icon    = icons.volume(volume);
+    let percent = (ratio * 100.0).round() as u8;
+    let vol_pct = (volume.min(VOLUME_MAX) * 100.0).round() as u8;
+    let vol_icon = icons.volume(volume);
 
     let prefix = if *icons == IconSet::NerdFont {
         format!("{} ", icons.music())
@@ -578,7 +693,11 @@ fn render_progress(
 
         let term_width = size().map(|(w, _)| w).unwrap_or(80) as usize;
         if hdr.width() > term_width {
-            let ellipsis = if *icons == IconSet::Ascii { "..." } else { "…" };
+            let ellipsis = if *icons == IconSet::Ascii {
+                "..."
+            } else {
+                "…"
+            };
             let max_len = term_width.saturating_sub(ellipsis.width());
             let mut width = 0;
             let mut truncated = String::new();
@@ -671,7 +790,9 @@ fn terminal_supports_unicode() -> bool {
     {
         std::env::var("WT_SESSION").is_ok()
             || std::env::var("ConEmuPID").is_ok()
-            || std::env::var("TERM_PROGRAM").map(|v| v == "vscode").unwrap_or(false)
+            || std::env::var("TERM_PROGRAM")
+                .map(|v| v == "vscode")
+                .unwrap_or(false)
             || std::env::var("ANSICON").is_ok()
     }
 

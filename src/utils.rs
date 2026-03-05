@@ -16,7 +16,9 @@ pub fn resolve_filepath(
         Ok(PathBuf::from(current_path).join(file_path))
     }?
     .canonicalize()
-    .map_err(|e| LabeledError::new(e.to_string()).with_label("Failed to canonicalize path", span))?;
+    .map_err(|e| {
+        LabeledError::new(e.to_string()).with_label("Failed to canonicalize path", span)
+    })?;
     Ok(file_path)
 }
 
@@ -45,7 +47,7 @@ pub fn load_file_path(
 /// (live progress display) so both always produce identical output.
 pub fn format_duration(d: Duration) -> String {
     let total_secs = d.as_secs();
-    let hours   = total_secs / 3600;
+    let hours = total_secs / 3600;
     let minutes = (total_secs % 3600) / 60;
     let seconds = total_secs % 60;
 

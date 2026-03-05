@@ -4,11 +4,13 @@ use lofty::prelude::Accessor;
 use lofty::{read_from_path, tag::Tag};
 use log::warn;
 use nu_plugin::{EvaluatedCall, SimplePluginCommand};
-use nu_protocol::{record, Category, LabeledError, Record, Signature, Span, SyntaxShape, Type, Value};
+use nu_protocol::{
+    record, Category, LabeledError, Record, Signature, Span, SyntaxShape, Type, Value,
+};
 use rodio::{Decoder, Source};
+use std::collections::HashSet;
 use std::io::Seek;
 use std::time::Duration;
-use std::collections::HashSet;
 
 use crate::{
     constants::{get_meta_records, TAG_MAP},
@@ -69,7 +71,7 @@ impl SimplePluginCommand for SoundMetaGetCmd {
         Signature::new("sound meta")
             .input_output_types(vec![
                 (Type::Nothing, Type::Record(vec![].into())),
-                (Type::Binary,  Type::Record(vec![].into())),
+                (Type::Binary, Type::Record(vec![].into())),
             ])
             .switch("all", "List all possible frame names", Some('a'))
             .optional("File Path", SyntaxShape::Filepath, "file to play")
@@ -137,17 +139,23 @@ fn parse_meta(
 /// Returns the record alongside the container-reported duration (if any) so the caller
 /// can pass it to [`parse_stream_meta`] as a fallback when rodio cannot determine the
 /// duration itself (e.g. with the minimp3 decoder).
-fn parse_tags(path: &std::path::Path, span: Span) -> Result<(Record, Option<Duration>), LabeledError> {
+fn parse_tags(
+    path: &std::path::Path,
+    span: Span,
+) -> Result<(Record, Option<Duration>), LabeledError> {
     let mut record = record! {};
     let mut lofty_duration: Option<Duration> = None;
 
-    let file_size = std::fs::metadata(path)
-        .map(|m| m.len())
-        .map_err(|e| LabeledError::new(e.to_string()).with_label("error reading file metadata", span))?;
+    let file_size = std::fs::metadata(path).map(|m| m.len()).map_err(|e| {
+        LabeledError::new(e.to_string()).with_label("error reading file metadata", span)
+    })?;
     record.push("size", Value::filesize(file_size as i64, span));
 
     if let Some(ext) = path.extension() {
-        record.push("format", Value::string(ext.to_string_lossy().to_string(), span));
+        record.push(
+            "format",
+            Value::string(ext.to_string_lossy().to_string(), span),
+        );
     }
 
     let tagged_file = read_from_path(path)
@@ -190,36 +198,36 @@ fn parse_tags(path: &std::path::Path, span: Span) -> Result<(Record, Option<Dura
             }
         }
 
-            insert_into_integer(&mut record, "track_no", tag.track(), span);
-            insert_into_integer(&mut record, "total_tracks", tag.track_total(), span);
-            insert_into_integer(&mut record, "disc_no", tag.disk(), span);
-            insert_into_integer(&mut record, "total_discs", tag.disk_total(), span);
+        insert_into_integer(&mut record, "track_no", tag.track(), span);
+        insert_into_integer(&mut record, "total_tracks", tag.track_total(), span);
+        insert_into_integer(&mut record, "disc_no", tag.disk(), span);
+        insert_into_integer(&mut record, "total_discs", tag.disk_total(), span);
 
-            // ── Embedded artwork ──────────────────────────────────────────────
-            let pictures = tag.pictures();
-            if !pictures.is_empty() {
-                let artwork: Vec<Value> = pictures
-                    .iter()
-                    .map(|pic| {
-                        let mut art = record! {
-                            "pic_type" => Value::string(format!("{:?}", pic.pic_type()), span),
-                            "mime_type" => Value::string(
-                                pic.mime_type()
-                                    .map(|m| m.as_str())
-                                    .unwrap_or("unknown")
-                                    .to_string(),
-                                span,
-                            ),
-                            "size" => Value::filesize(pic.data().len() as i64, span),
-                        };
-                        if let Some(desc) = pic.description() {
-                            art.push("description", Value::string(desc.to_string(), span));
-                        }
-                        Value::record(art, span)
-                    })
-                    .collect();
-                record.push("artwork", Value::list(artwork, span));
-            }
+        // ── Embedded artwork ──────────────────────────────────────────────
+        let pictures = tag.pictures();
+        if !pictures.is_empty() {
+            let artwork: Vec<Value> = pictures
+                .iter()
+                .map(|pic| {
+                    let mut art = record! {
+                        "pic_type" => Value::string(format!("{:?}", pic.pic_type()), span),
+                        "mime_type" => Value::string(
+                            pic.mime_type()
+                                .map(|m| m.as_str())
+                                .unwrap_or("unknown")
+                                .to_string(),
+                            span,
+                        ),
+                        "size" => Value::filesize(pic.data().len() as i64, span),
+                    };
+                    if let Some(desc) = pic.description() {
+                        art.push("description", Value::string(desc.to_string(), span));
+                    }
+                    Value::record(art, span)
+                })
+                .collect();
+            record.push("artwork", Value::list(artwork, span));
+        }
     }
     Ok((record, lofty_duration))
 }
@@ -244,7 +252,10 @@ fn parse_stream_meta(source: &impl Source, lofty_duration: Option<Duration>, spa
         record.push("duration", Value::nothing(span));
         // TODO: fallback estimation by filesize
     }
-    record.push("sample_rate", Value::int(source.sample_rate().get() as i64, span));
+    record.push(
+        "sample_rate",
+        Value::int(source.sample_rate().get() as i64, span),
+    );
     record.push("channels", Value::int(source.channels().get() as i64, span));
     record
 }
@@ -254,7 +265,10 @@ fn parse_stream_meta(source: &impl Source, lofty_duration: Option<Duration>, spa
 /// Looks up the normalised key in [`TAG_MAP`], obtains or creates the primary tag,
 /// calls `insert_text`, saves the file in-place, then re-reads and returns the
 /// updated metadata record so the caller always sees the final on-disk state.
-fn audio_meta_set(engine: &nu_plugin::EngineInterface, call: &EvaluatedCall) -> Result<Value, LabeledError> {
+fn audio_meta_set(
+    engine: &nu_plugin::EngineInterface,
+    call: &EvaluatedCall,
+) -> Result<Value, LabeledError> {
     let (_, file_value, path) = load_file(engine, call)?;
     let key = match call.get_flag_value("key") {
         Some(Value::String { val, .. }) => val,
@@ -277,10 +291,13 @@ fn audio_meta_set(engine: &nu_plugin::EngineInterface, call: &EvaluatedCall) -> 
     })?;
 
     let normalized_key = key.to_lowercase();
-    let item_key = TAG_MAP.get(normalized_key.as_str()).cloned().ok_or_else(|| {
-        LabeledError::new(format!("Unknown metadata key: {}", normalized_key))
-            .with_label("key not found", call.head)
-    })?;
+    let item_key = TAG_MAP
+        .get(normalized_key.as_str())
+        .cloned()
+        .ok_or_else(|| {
+            LabeledError::new(format!("Unknown metadata key: {}", normalized_key))
+                .with_label("key not found", call.head)
+        })?;
 
     let tag = match tagged_file.primary_tag_mut() {
         Some(tag) => tag,
@@ -303,9 +320,9 @@ fn audio_meta_set(engine: &nu_plugin::EngineInterface, call: &EvaluatedCall) -> 
         .with_label("insert_text returned false", call.head));
     }
 
-    tagged_file.save_to_path(&path, WriteOptions::default()).map_err(|e| {
-        LabeledError::new(e.to_string()).with_label("error saving file", call.head)
-    })?;
+    tagged_file
+        .save_to_path(&path, WriteOptions::default())
+        .map_err(|e| LabeledError::new(e.to_string()).with_label("error saving file", call.head))?;
 
     let file = std::fs::File::open(&path).map_err(|e| {
         LabeledError::new(e.to_string()).with_label("error re-opening file for parsing", call.head)
