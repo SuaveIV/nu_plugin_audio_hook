@@ -5,7 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.2.2 (2026-03-05)
+
+### Chore
+
+ - <csr-id-3809e33e90edbc4ec545e883f7cb7ee86cef16e9/> update copyright years in LICENSE file
+
+### New Features
+
+ - <csr-id-37c0f45e56c7671fffc094ddbf1bc599c381ea8a/> add Justfile for common tasks and contributor guidance
+
+### Bug Fixes
+
+ - <csr-id-15632ccaad3ccf6dfd0562596c2006c0a2bf2ef6/> suppress header render when terminal too narrow to fit on one line
+   MoveUp(1) assumes the header occupies exactly one physical row. When the
+   terminal is narrower than the header string, the header wraps and the
+   cursor drifts up by one row short each cycle, leaving ghost copies behind
+   on every frame.
+   
+   Extend the MIN_RENDER_WIDTH bail-out to also return early when a header
+   is present and the terminal width is less than the header display width.
+ - <csr-id-e487a117c0e3b2755c975113bf835cf638a8bc5d/> cast sample to f64 before multiply to support 64bit feature
+ - <csr-id-f4850e2cb8c511137df1ca4cdb652b3156469443/> ensure credentials are not persisted during checkout in dependency update workflow
+ - <csr-id-1c0ce8935d3f2a83a612e375e6bdcea09d2384e8/> enable ARM64 build job in GitHub Actions workflow
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **Uncategorized**
+    - Suppress header render when terminal too narrow to fit on one line ([`15632cc`](https://github.com/SuaveIV/nu_plugin_audio/commit/15632ccaad3ccf6dfd0562596c2006c0a2bf2ef6))
+    - Cast sample to f64 before multiply to support 64bit feature ([`e487a11`](https://github.com/SuaveIV/nu_plugin_audio/commit/e487a117c0e3b2755c975113bf835cf638a8bc5d))
+    - Ensure credentials are not persisted during checkout in dependency update workflow ([`f4850e2`](https://github.com/SuaveIV/nu_plugin_audio/commit/f4850e2cb8c511137df1ca4cdb652b3156469443))
+    - Enable ARM64 build job in GitHub Actions workflow ([`1c0ce89`](https://github.com/SuaveIV/nu_plugin_audio/commit/1c0ce8935d3f2a83a612e375e6bdcea09d2384e8))
+    - Update copyright years in LICENSE file ([`3809e33`](https://github.com/SuaveIV/nu_plugin_audio/commit/3809e33e90edbc4ec545e883f7cb7ee86cef16e9))
+    - Add Justfile for common tasks and contributor guidance ([`37c0f45`](https://github.com/SuaveIV/nu_plugin_audio/commit/37c0f45e56c7671fffc094ddbf1bc599c381ea8a))
+</details>
+
 ## v0.2.1 (2026-03-04)
+
+<csr-id-a2eda3f6b11eaefc0235efc777f8531b34f334c0/>
 
 ### Documentation
 
@@ -15,18 +56,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
  - <csr-id-1b6fcda80fa803fbe4d9263400c71337e6ebfcc7/> bump version to 0.2.1
  - <csr-id-a1e095631655da6915593f1bc064432cc0d01d34/> update README and metadata for version 0.2.0; improve code formatting and error handling
+ - <csr-id-31dc072bafe4c903487d5b2f48525910c73e2ddf/> restore pre-build steps for aarch64 target in Cross.toml
+ - <csr-id-15a1da7df713bf2f8267a7517f18840f9b74834d/> add pre-build steps for aarch64 target in Cross.tonl
 
 ### Refactor
 
  - <csr-id-a2eda3f6b11eaefc0235efc777f8531b34f334c0/> simplify return statements and improve code readability in SoundBeepCmd and generate_wav functions
 
-### Commit Statistics
+### Bug Fixes
 
-<csr-read-only-do-not-edit/>
+ - <csr-id-c1628912cd9fee2c43bd546b67afd7b6447a1dcd/> disable build-arm64 job in release workflow
+ - <csr-id-54f309d802c84c6f28ff4874a36305ddd64b2091/> update cross installation command to remove version specification
+ - <csr-id-8d300a0ebcb3a5b6db189a749cbe3048dbd6106c/> update release workflow to use input tag for packaging and uploading
 
- - 4 commits contributed to the release.
- - 4 commits were understood as [conventional](https://www.conventionalcommits.org).
- - 0 issues like '(#ID)' were seen in commit messages
+### Chore
+
+ - <csr-id-8f3c1ec53d218acada8a05945d199bab30793c0c/> remove GitHub Actions workflow for tagging on merge
 
 ### Commit Details
 
@@ -35,13 +80,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Remove GitHub Actions workflow for tagging on merge ([`8f3c1ec`](https://github.com/SuaveIV/nu_plugin_audio/commit/8f3c1ec53d218acada8a05945d199bab30793c0c))
+    - Release nu_plugin_audio v0.2.1 ([`3b1d2ba`](https://github.com/SuaveIV/nu_plugin_audio/commit/3b1d2bad6a7f5d69853b5b916c5bcba779d8c67c))
     - Bump version to 0.2.1 ([`1b6fcda`](https://github.com/SuaveIV/nu_plugin_audio/commit/1b6fcda80fa803fbe4d9263400c71337e6ebfcc7))
     - Simplify return statements and improve code readability in SoundBeepCmd and generate_wav functions ([`a2eda3f`](https://github.com/SuaveIV/nu_plugin_audio/commit/a2eda3f6b11eaefc0235efc777f8531b34f334c0))
     - Add CONTRIBUTING.md to guide new contributors ([`ccdb7d2`](https://github.com/SuaveIV/nu_plugin_audio/commit/ccdb7d2d0e87bfe10420b5e3fff68f52d378fdc9))
     - Update README and metadata for version 0.2.0; improve code formatting and error handling ([`a1e0956`](https://github.com/SuaveIV/nu_plugin_audio/commit/a1e095631655da6915593f1bc064432cc0d01d34))
+    - Release nu_plugin_audio v0.2.0 ([`50e1c47`](https://github.com/SuaveIV/nu_plugin_audio/commit/50e1c47930835cd9b5c9ec7464e5cf299f1a0794))
+    - Restore pre-build steps for aarch64 target in Cross.toml ([`31dc072`](https://github.com/SuaveIV/nu_plugin_audio/commit/31dc072bafe4c903487d5b2f48525910c73e2ddf))
+    - Disable build-arm64 job in release workflow ([`c162891`](https://github.com/SuaveIV/nu_plugin_audio/commit/c1628912cd9fee2c43bd546b67afd7b6447a1dcd))
+    - Add pre-build steps for aarch64 target in Cross.tonl ([`15a1da7`](https://github.com/SuaveIV/nu_plugin_audio/commit/15a1da7df713bf2f8267a7517f18840f9b74834d))
+    - Update cross installation command to remove version specification ([`54f309d`](https://github.com/SuaveIV/nu_plugin_audio/commit/54f309d802c84c6f28ff4874a36305ddd64b2091))
+    - Update release workflow to use input tag for packaging and uploading ([`8d300a0`](https://github.com/SuaveIV/nu_plugin_audio/commit/8d300a0ebcb3a5b6db189a749cbe3048dbd6106c))
 </details>
 
-## v0.2.0 (2026-03-04)
+## v0.2.0 (2026-03-03)
 
 ### New Features
 
@@ -51,10 +104,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - <csr-id-46cfd591cc1bb53ecf602fc36a8c02695cfdc714/> enhance audio playback support and improve WAV generation
  - <csr-id-c79d8d369c286a89a3f52177c622f43e1cbcd91e/> update dependencies and enhance audio handling
    - Updated `rodio` dependency version from 0.21.1 to 0.22.1 in Cargo.toml.
-- Changed `OutputStreamBuilder` to `DeviceSinkBuilder` for audio output stream handling.
-- Updated audio source handling to use `Player` instead of `Sink`.
-- Adjusted sample rate and channel retrieval to use the new API methods.
-- Enhanced sine wave generation and playback functionality with updated types.
 
 ### Bug Fixes
 
@@ -63,14 +112,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - <csr-id-54f309d802c84c6f28ff4874a36305ddd64b2091/> update cross installation command to remove version specification
  - <csr-id-8d300a0ebcb3a5b6db189a749cbe3048dbd6106c/> update release workflow to use input tag for packaging and uploading
 
-### Commit Statistics
-
-<csr-read-only-do-not-edit/>
-
- - 10 commits contributed to the release.
- - 8 commits were understood as [conventional](https://www.conventionalcommits.org).
- - 0 issues like '(#ID)' were seen in commit messages
-
 ### Commit Details
 
 <csr-read-only-do-not-edit/>
@@ -78,12 +119,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
-    - Release nu_plugin_audio v0.2.0 ([`50e1c47`](https://github.com/SuaveIV/nu_plugin_audio/commit/50e1c47930835cd9b5c9ec7464e5cf299f1a0794))
-    - Restore pre-build steps for aarch64 target in Cross.toml ([`31dc072`](https://github.com/SuaveIV/nu_plugin_audio/commit/31dc072bafe4c903487d5b2f48525910c73e2ddf))
-    - Disable build-arm64 job in release workflow ([`c162891`](https://github.com/SuaveIV/nu_plugin_audio/commit/c1628912cd9fee2c43bd546b67afd7b6447a1dcd))
-    - Add pre-build steps for aarch64 target in Cross.tonl ([`15a1da7`](https://github.com/SuaveIV/nu_plugin_audio/commit/15a1da7df713bf2f8267a7517f18840f9b74834d))
-    - Update cross installation command to remove version specification ([`54f309d`](https://github.com/SuaveIV/nu_plugin_audio/commit/54f309d802c84c6f28ff4874a36305ddd64b2091))
-    - Update release workflow to use input tag for packaging and uploading ([`8d300a0`](https://github.com/SuaveIV/nu_plugin_audio/commit/8d300a0ebcb3a5b6db189a749cbe3048dbd6106c))
     - Adjust release workflow to handle pull requests and improve tag handling ([`82d461e`](https://github.com/SuaveIV/nu_plugin_audio/commit/82d461e5d751b16791c2536d6ffb382dbbcbf872))
     - Merge pull request #7 from SuaveIV/rodio_update ([`51f8cd5`](https://github.com/SuaveIV/nu_plugin_audio/commit/51f8cd5d64e91785f8a10f18e019aa4062fca586))
     - Enhance audio playback support and improve WAV generation ([`46cfd59`](https://github.com/SuaveIV/nu_plugin_audio/commit/46cfd591cc1bb53ecf602fc36a8c02695cfdc714))
@@ -91,7 +126,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 </details>
 
 <csr-unknown>
- restore pre-build steps for aarch64 target in Cross.toml add pre-build steps for aarch64 target in Cross.tonl<csr-unknown/>
+Changed OutputStreamBuilder to DeviceSinkBuilder for audio output stream handling.Updated audio source handling to use Player instead of Sink.Adjusted sample rate and channel retrieval to use the new API methods.Enhanced sine wave generation and playback functionality with updated types.<csr-unknown/>
 
 ## v0.1.0 (2026-03-03)
 
@@ -100,14 +135,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Chore
 
  - <csr-id-43528fc4d388c45aebd99bf178f7251085f1dabe/> update version to 0.1.0 across all relevant files
-
-### Commit Statistics
-
-<csr-read-only-do-not-edit/>
-
- - 2 commits contributed to the release.
- - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
- - 0 issues like '(#ID)' were seen in commit messages
 
 ### Commit Details
 
@@ -156,14 +183,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    Adds a manual `build-arm64` job to the release workflow. `cargo-dist` does not currently support cross-compiling with system dependencies (ALSA) easily via `cargo-zigbuild` without a custom sysroot. This job uses `cross` to build for `aarch64-unknown-linux-gnu` and uploads the artifact to the release created by `cargo-dist`.
  - <csr-id-4ef01757bb9ede3c70429653c86c76513c894508/> add linux system dependencies
    Adds `libasound2-dev` and `pkg-config` to the `[dist.dependencies.apt]` section in `dist-workspace.toml`. This ensures that the generated GitHub Actions workflow installs the necessary ALSA development headers before building on Linux runners.
-
-### Commit Statistics
-
-<csr-read-only-do-not-edit/>
-
- - 16 commits contributed to the release.
- - 13 commits were understood as [conventional](https://www.conventionalcommits.org).
- - 0 issues like '(#ID)' were seen in commit messages
 
 ### Commit Details
 
@@ -227,10 +246,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - <csr-id-b45e901d21f3bf7b4ce3507cf6d173398aa7c189/> update README with playback display, controls, and format support table
  - <csr-id-a99cff6faa92a00a8dc1162ca75d57a1128c794f/> update README with new features and fixes
    - Add `sound make --data` example for saving generated tones to WAV files
-- Add `sound play --amplify` examples for volume control
-- Update `sound meta` example output to include size, format, sample_rate, and channels
-- Add `--locked` flag to all cargo install/build commands due to upstream dependency issue
-- Fix markdownlint warnings (MD040, MD036, MD012)
 
 ### New Features
 
@@ -240,26 +255,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - <csr-id-9e71bea71ac2fb76fa3a569b0dd292ed13a80aea/> expand TAG_MAP, expose FileProperties, artwork, and fix duration
    - TAG_MAP: HashMap → BTreeMap; add 22 new keys (comment, lyrics, label,
    producer, remixer, replaygain_*, compilation, barcode, script, etc.)
-- sound meta: expose bitrate, audio_bitrate, bit_depth from FileProperties;
-     expose embedded artwork as a list of {pic_type, mime_type, size} records;
-     key lookup is now case-insensitive; insert_text failure returns LabeledError
-- Duration: formatted as H:MM:SS string in both sound meta output and the
-     progress bar; audio_player falls back to lofty FileProperties duration so
-     minimp3 files no longer need a manual -d flag
-- README: updated example output, artwork/ReplayGain examples, full key
-     reference table, removed stale $in.duration pipeline example
-- Add live progress bar to `sound play` with elapsed/total time tracking.
-- Add interactive keyboard controls for files longer than 1 minute:
-     - Space to toggle play/pause
-     - Left/Right (or h/l) to seek
-     - Up/Down (or k/j) to adjust volume
-     - 'm' to toggle mute
-     - 'q' or Esc to quit
-- Left/Right (or h/l) to seek
-- Up/Down (or k/j) to adjust volume
-- 'm' to toggle mute
-- 'q' or Esc to quit
-- The '--amplify' flag is now available for 'sound play' to adjust playback volume. I also updated 'sound make' to clarify that its existing amplify flag can be used to make sounds quieter by using values below 1.0.
+   - Space to toggle play/pause
+   - Left/Right (or h/l) to seek
+   - Up/Down (or k/j) to adjust volume
+   - 'm' to toggle mute
+   - 'q' or Esc to quit
 
 ### Bug Fixes
 
@@ -295,38 +295,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - <csr-id-5fdd4d3ac0348b285cd723b7c5a1b65dd181c6ee/> update dependencies to latest versions and clean up Cargo.lock
  - <csr-id-274bfc72ca8597f3c80f6ffebf265da9d69d2a5a/> unblock dependency updates and secure workflow
    - Remove explicit interprocess=2.2.1 pin from workflow and Cargo.toml
-- Add explicit contents: write permission block
-- Pin GitHub actions to exact commit SHAs to prevent supply chain attacks
-- README: replace '...' size placeholder in FLAC example with '42.3 MiB'
-- utils: extract shared pub format_duration (M:SS / H:MM:SS) used by both
-     audio_meta and audio_player, eliminating duplicate implementations
-- audio_meta: add (Type::Binary, Type::Record) to input_output_types so
-     nushell routes binary pipeline input to the existing unsupported-input guard
-- audio_meta: thread lofty container-header duration through parse_tags →
-     parse_meta → parse_stream_meta as a fallback; use source.total_duration()
-     .or(lofty_duration) so minimp3 files no longer emit Value::nothing for
-     the duration field when lofty can supply it
-- audio_player: replace misleading piped example
-     ('sound meta audio.mp3 | sound play audio.mp3') with a correct standalone
-     usage ('sound play audio.mp3'); _input is not consumed by play_audio
-- audio_player: consolidate two lofty::read_from_path(&path) calls into one
-     tagged_file_res, deriving both (title, artist) and source_duration from it
-- constants: add 'publisher' alias for ItemKey::Publisher alongside a comment
-     explaining the Vorbis/TXXX 'organization' convention
-- Pin bump-script URL to full 40-char SHA (2b1f155…270f8)
-- Pin softprops/action-gh-release to v2.5.0 SHA (a06a81a)
-- Pin EndBug/add-and-commit to v9 SHA (a94899b)
-- Remove -e from git shortlog to stop leaking contributor emails
-- Remove unused last_position variable (declared and written but never read)
-- Cap sink.get_pos() with .min(total) so codecs that briefly report a
-     position beyond the stream duration don't prematurely trigger the
-     end-of-track break or clamp the bar to 100%
-- Add MIN_RENDER_WIDTH (40) guard at the top of render_progress to silently
-     skip rendering on very narrow terminals instead of printing wrapped garbage
-- Fix Windows file locking by dropping read handles before writing tags.
-- Add overflow protection to WAV header generation.
-- Handle missing duration gracefully and improve error messages.
-- Add `log` dependency.
 
 ### Other
 
@@ -359,15 +327,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - **Feature**: Added `--data` flag to `sound make`. This allows generating WAV binary data directly to stdout, enabling file saving via pipes (e.g., `sound make ... --data | save output.wav`).
    - **Enhancement**: Updated `sound meta` to provide additional technical metadata, including file size, file format extension, sample rate, and channel count.
    - **Cleanup**: Simplified error handling in `sound_make.rs` and removed unused imports across the project.
-
-### Commit Statistics
-
-<csr-read-only-do-not-edit/>
-
- - 94 commits contributed to the release over the course of 88 calendar days.
- - 90 days passed between releases.
- - 50 commits were understood as [conventional](https://www.conventionalcommits.org).
- - 0 issues like '(#ID)' were seen in commit messages
 
 ### Commit Details
 
@@ -473,18 +432,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 </details>
 
 <csr-unknown>
- add interactive audio player with rich progress displayAdd visual volume bar and dynamic terminal width scaling.Add Nerd Font support via --nerd-fonts flag or NERD_FONTS env var, featuring smooth sub-character rendering.Add --no-progress flag to suppress output for background use.Fix busy-wait loop by replacing it with a sleep-based tick. Add volume control to sound play and make command string formatting in build.nu improve error handling in audio metadata parsing and update dependency version extraction add publisher alias in README and improve error handling in audio metadata parsing correct duration format in README and improve error handling in audio metadata parsing address review findings across meta, player, constants, and README coerce vec to boxed slice for Type::Record in input_output_typesnu-protocol 0.110.0 expects Box<[(String, Type)]> not Vec — appending .into() to the empty vec literals satisfies the type checker. change cargo build to cargo check in dependency update workflow sanitize plugin version in dependency update workflow inline dep bump script and pin interprocess to =2.2.1 downgrade interprocess to version 2.2.1 prevent flicker and make header responsive optimize header rendering and clear progress line to reduce flicker improve progress header display and handle truncation stop progress bar from flickeringInterleaved write!/queue! calls were letting the OS render partial framesbefore the flush. The whole frame is now buffered and sent in one write_all.Also fixed the artist/title header, which was printed once and abandoned —cursor movement around the progress line below it caused visual noise. Bothlines are now redrawn together on every frame using a first_render flag toreserve the two-line region on the initial draw. harden CI workflow, fix bar overflow, update unicode-widthCI / security: remove dead code, guard codec overrun, skip narrow terminals update playback command description to include 5s seeking functionality update Nushell setup action to version 3 enhance character width handling and improve progress display logic improve playback logic, display rendering, and workflow stability change env_logger initialization to try_init for safer logging setup improve error handling for negative and invalid duration values in load_values function correct key name for recording year in ID3_HASHMAP update audio file references in metadata commands and examples Windows file locking, improve WAV safety, and enhance error handling remove print in stderr for sound play disable OutputStream log on drop quote paths so they can contain spaces<csr-unknown/>
+Add sound play --amplify examples for volume controlUpdate sound meta example output to include size, format, sample_rate, and channelsAdd --locked flag to all cargo install/build commands due to upstream dependency issueFix markdownlint warnings (MD040, MD036, MD012)sound meta: expose bitrate, audio_bitrate, bit_depth from FileProperties;expose embedded artwork as a list of {pic_type, mime_type, size} records;key lookup is now case-insensitive; insert_text failure returns LabeledErrorDuration: formatted as H:MM:SS string in both sound meta output and theprogress bar; audio_player falls back to lofty FileProperties duration sominimp3 files no longer need a manual -d flagREADME: updated example output, artwork/ReplayGain examples, full keyreference table, removed stale $in.duration pipeline exampleAdd live progress bar to sound play with elapsed/total time tracking.Add interactive keyboard controls for files longer than 1 minute:Left/Right (or h/l) to seekUp/Down (or k/j) to adjust volume‘m’ to toggle mute‘q’ or Esc to quitThe ‘–amplify’ flag is now available for ‘sound play’ to adjust playback volume. I also updated ‘sound make’ to clarify that its existing amplify flag can be used to make sounds quieter by using values below 1.0.Add explicit contents: write permission blockPin GitHub actions to exact commit SHAs to prevent supply chain attacksREADME: replace ‘…’ size placeholder in FLAC example with ‘42.3 MiB’utils: extract shared pub format_duration (M:SS / H:MM:SS) used by bothaudio_meta and audio_player, eliminating duplicate implementationsaudio_meta: add (Type::Binary, Type::Record) to input_output_types sonushell routes binary pipeline input to the existing unsupported-input guardaudio_meta: thread lofty container-header duration through parse_tags →parse_meta → parse_stream_meta as a fallback; use source.total_duration().or(lofty_duration) so minimp3 files no longer emit Value::nothing forthe duration field when lofty can supply itaudio_player: replace misleading piped example(‘sound meta audio.mp3 | sound play audio.mp3’) with a correct standaloneusage (‘sound play audio.mp3’); _input is not consumed by play_audioaudio_player: consolidate two lofty::read_from_path(&path) calls into onetagged_file_res, deriving both (title, artist) and source_duration from itconstants: add ‘publisher’ alias for ItemKey::Publisher alongside a commentexplaining the Vorbis/TXXX ‘organization’ conventionPin bump-script URL to full 40-char SHA (2b1f155…270f8)Pin softprops/action-gh-release to v2.5.0 SHA (a06a81a)Pin EndBug/add-and-commit to v9 SHA (a94899b)Remove -e from git shortlog to stop leaking contributor emailsRemove unused last_position variable (declared and written but never read)Cap sink.get_pos() with .min(total) so codecs that briefly report aposition beyond the stream duration don’t prematurely trigger theend-of-track break or clamp the bar to 100%Add MIN_RENDER_WIDTH (40) guard at the top of render_progress to silentlyskip rendering on very narrow terminals instead of printing wrapped garbageFix Windows file locking by dropping read handles before writing tags.Add overflow protection to WAV header generation.Handle missing duration gracefully and improve error messages.Add log dependency.<csr-unknown/>
 
 ## v0.109.1 (2025-12-03)
-
-### Commit Statistics
-
-<csr-read-only-do-not-edit/>
-
- - 1 commit contributed to the release.
- - 2 days passed between releases.
- - 0 commits were understood as [conventional](https://www.conventionalcommits.org).
- - 0 issues like '(#ID)' were seen in commit messages
 
 ### Commit Details
 
@@ -497,15 +447,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 </details>
 
 ## v0.109.0 (2025-11-30)
-
-### Commit Statistics
-
-<csr-read-only-do-not-edit/>
-
- - 19 commits contributed to the release over the course of 42 calendar days.
- - 44 days passed between releases.
- - 0 commits were understood as [conventional](https://www.conventionalcommits.org).
- - 0 issues like '(#ID)' were seen in commit messages
 
 ### Commit Details
 
@@ -536,15 +477,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 </details>
 
 ## v0.108.0 (2025-10-17)
-
-### Commit Statistics
-
-<csr-read-only-do-not-edit/>
-
- - 21 commits contributed to the release over the course of 41 calendar days.
- - 43 days passed between releases.
- - 0 commits were understood as [conventional](https://www.conventionalcommits.org).
- - 0 issues like '(#ID)' were seen in commit messages
 
 ### Commit Details
 
@@ -577,14 +509,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 </details>
 
 ## v0.107.0 (2025-09-03)
-
-### Commit Statistics
-
-<csr-read-only-do-not-edit/>
-
- - 13 commits contributed to the release over the course of 30 calendar days.
- - 0 commits were understood as [conventional](https://www.conventionalcommits.org).
- - 0 issues like '(#ID)' were seen in commit messages
 
 ### Commit Details
 
@@ -679,15 +603,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - <csr-id-d73259f2473e79653f11890091a7af5b789a1230/> bump id3 version
  - <csr-id-5aa55fb893fd0e952158cf8b269063c393a27701/> Bump nu-protocol version to 0.93
 
-### Commit Statistics
-
-<csr-read-only-do-not-edit/>
-
- - 70 commits contributed to the release over the course of 634 calendar days.
- - 635 days passed between releases.
- - 36 commits were understood as [conventional](https://www.conventionalcommits.org).
- - 2 unique issues were worked on: [#6](https://github.com/SuaveIV/nu_plugin_audio/issues/6), [#7](https://github.com/SuaveIV/nu_plugin_audio/issues/7)
-
 ### Commit Details
 
 <csr-read-only-do-not-edit/>
@@ -771,14 +686,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.1.2 (2023-11-07)
 
-### Commit Statistics
-
-<csr-read-only-do-not-edit/>
-
- - 4 commits contributed to the release.
- - 0 commits were understood as [conventional](https://www.conventionalcommits.org).
- - 0 issues like '(#ID)' were seen in commit messages
-
 ### Commit Details
 
 <csr-read-only-do-not-edit/>
@@ -799,14 +706,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Other
 
  - <csr-id-0e2b1039d49a088f0f9de18585019ff0b642d313/> sound make
-
-### Commit Statistics
-
-<csr-read-only-do-not-edit/>
-
- - 17 commits contributed to the release.
- - 1 commit was understood as [conventional](https://www.conventionalcommits.org).
- - 0 issues like '(#ID)' were seen in commit messages
 
 ### Commit Details
 
