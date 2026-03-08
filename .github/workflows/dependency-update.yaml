@@ -92,7 +92,7 @@ jobs:
             let escaped_dep = ($dep | str replace --regex "([\\[\\]\\(\\)\\*\\+\\?\\^\\$\\.\\|])" "\\$1")
             $acc
               | str replace --regex $"\\(?m\\)^\\(($escaped_dep)\\s*=\\s*\\)\".*?\"" $"${1}\"($sanitized_plugin_version)\""
-              | str replace --regex $"\\(?s\\)\\(\\[dependencies\\.($escaped_dep)\\][^\\[]*?version\\s*=\\s*\\)\".*?\"" $"${1}\"($sanitized_plugin_version)\""
+              | str replace --regex $"\\(?s\\)\\(\\[(?:dev-)?dependencies\\.($escaped_dep)\\][^\\[]*?version\\s*=\\s*\\)\".*?\"" $"${1}\"($sanitized_plugin_version)\""
               | str replace --regex $"\\(?m\\)^\\(($escaped_dep)\\s*=.*version\\s*=\\s*\\)\"[^\"]+\"" $"${1}\"($sanitized_plugin_version)\""
           })
 
