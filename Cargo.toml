@@ -1,6 +1,6 @@
 [package]
 name = "nu_plugin_audio"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2021"
 description = "A nushell plugin to make and play sounds"
 homepage = "https://github.com/SuaveIV/nu_plugin_audio"
