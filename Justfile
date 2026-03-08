@@ -38,35 +38,35 @@ build-release-all:
 build-release-lite:
     cargo build --release --locked --no-default-features --features=lite
 
-# install debug build for development (default features)
-dev:
-    cargo build
-    nu -c "plugin add target/debug/nu_plugin_audio"
-
-# install debug build with all decoders
-dev-all:
-    cargo build --features=all-decoders
-    nu -c "plugin add target/debug/nu_plugin_audio"
-
-# install debug build with lite decoders
-dev-lite:
-    cargo build --no-default-features --features=lite
-    nu -c "plugin add target/debug/nu_plugin_audio"
-
-# install optimized build via cargo install (default features)
-install:
+# install optimized build via cargo install (*nix)
+install-nx:
     cargo install --path . --locked
     nu -c "plugin add ~/.cargo/bin/nu_plugin_audio"
 
-# install optimized build with all decoders
-install-all:
+# install optimized build via cargo install (Windows)
+install-win:
+    cargo install --path . --locked
+    nu -c "plugin add ~\\.cargo\\bin\\nu_plugin_audio.exe"
+
+# install optimized build with all decoders (*nix)
+install-all-nx:
     cargo install --path . --locked --features=all-decoders
     nu -c "plugin add ~/.cargo/bin/nu_plugin_audio"
 
-# install optimized build with lite decoders
-install-lite:
+# install optimized build with all decoders (Windows)
+install-all-win:
+    cargo install --path . --locked --features=all-decoders
+    nu -c "plugin add ~\\.cargo\\bin\\nu_plugin_audio.exe"
+
+# install optimized build with lite decoders (*nix)
+install-lite-nx:
     cargo install --path . --locked --no-default-features --features=lite
     nu -c "plugin add ~/.cargo/bin/nu_plugin_audio"
+
+# install optimized build with lite decoders (Windows)
+install-lite-win:
+    cargo install --path . --locked --no-default-features --features=lite
+    nu -c "plugin add ~\\.cargo\\bin\\nu_plugin_audio.exe"
 
 # dry-run release (preview changelog, no publish)
 release-dry:
