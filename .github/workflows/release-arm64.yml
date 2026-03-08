@@ -21,8 +21,15 @@ jobs:
       TAG: ${{ github.event.inputs.tag || github.ref_name }}
       PKG_CONFIG_SYSROOT_DIR: /usr/lib/aarch64-linux-gnu
     steps:
-      - uses: actions/checkout@v6
+      - name: Validate tag format
+        run: |
+          if [[ ! "${{ env.TAG }}" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+            echo "Error: Invalid tag format"
+            exit 1
+          fi
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
+          ref: ${{ env.TAG }}
           persist-credentials: false
           submodules: recursive
       - name: Install cross
@@ -32,31 +39,31 @@ jobs:
       - name: Package
         run: |
           tar -czf \
-            nu_plugin_audio-${{ env.TAG }}-aarch64-unknown-linux-gnu.tar.gz \
+            "nu_plugin_audio-${{ env.TAG }}-aarch64-unknown-linux-gnu.tar.gz" \
             -C target/aarch64-unknown-linux-gnu/release nu_plugin_audio
       - name: Checksum
         run: |
-          sha256sum nu_plugin_audio-${{ env.TAG }}-aarch64-unknown-linux-gnu.tar.gz \
-            > nu_plugin_audio-${{ env.TAG }}-aarch64-unknown-linux-gnu.tar.gz.sha256
+          sha256sum "nu_plugin_audio-${{ env.TAG }}-aarch64-unknown-linux-gnu.tar.gz" \
+            > "nu_plugin_audio-${{ env.TAG }}-aarch64-unknown-linux-gnu.tar.gz.sha256"
       - name: Wait for main release
         run: |
           echo "Waiting for main release to be published for tag ${{ env.TAG }}"
-          for i in {1..360}; do
-            DRAFT=$(gh api repos/${{ github.repository }}/releases/tags/${{ env.TAG }} \
+          for i in {1..90}; do
+            DRAFT=$(gh api "repos/${{ github.repository }}/releases/tags/${{ env.TAG }}" \
               --jq '.draft' 2>/dev/null || echo "notfound")
             if [ "$DRAFT" = "false" ]; then
               echo "Release is published, proceeding"
               break
             fi
-            if [ $i -eq 360 ]; then
+            if [ "$i" -eq 90 ]; then
               echo "Timeout waiting for release"
               exit 1
             fi
-            echo "Attempt $i/360: waiting..."
-            sleep 5
+            echo "Attempt $i/90: waiting..."
+            sleep 10
           done
       - name: Upload to Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         with:
           files: |
             nu_plugin_audio-${{ env.TAG }}-aarch64-unknown-linux-gnu.tar.gz
