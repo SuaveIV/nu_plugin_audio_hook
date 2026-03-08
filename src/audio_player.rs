@@ -38,6 +38,11 @@ const VOLUME_STEP: f32 = 0.05;
 /// Maximum volume (200%).
 const VOLUME_MAX: f32 = 2.0;
 
+const WIDTH_FULL: u16 = 80;
+const WIDTH_COMPACT: u16 = 50;
+const WIDTH_MINIMAL: u16 = 30;
+const WIDTH_BARE: u16 = 20;
+
 /// Selects the glyph set used for the live progress display.
 ///
 /// Priority order for resolution: `--nerd-fonts` flag → `NERD_FONTS=1` env var →
@@ -379,6 +384,8 @@ fn wait_silent(
 }
 
 /// Context for the wait_with_progress function, grouping all its parameters.
+///
+/// Holds the state required to drive the playback loop and render the UI.
 struct WaitProgressContext<'a> {
     engine: &'a EngineInterface,
     call: &'a EvaluatedCall,
@@ -395,6 +402,9 @@ struct WaitProgressContext<'a> {
 /// For files longer than [`CONTROLS_THRESHOLD`] the terminal is placed in raw mode and
 /// keyboard events (space, arrows, `m`, `q`) are processed. Raw mode is always restored
 /// on exit, even if an error occurs.
+///
+/// Delegates the actual drawing to [`render_progress`], managing the `scroll_offset`
+/// state for the header marquee animation and the `first_render` initialization flag.
 fn wait_with_progress(ctx: WaitProgressContext) -> Result<(), LabeledError> {
     let mut err = stderr();
     let interactive = ctx.total >= CONTROLS_THRESHOLD;
@@ -407,6 +417,7 @@ fn wait_with_progress(ctx: WaitProgressContext) -> Result<(), LabeledError> {
     let mut volume = ctx.initial_volume;
     let mut pre_mute_volume = ctx.initial_volume;
     let mut first_render = true;
+    let mut scroll_offset: usize = 0;
 
     let _ = execute!(err, Hide);
 
@@ -527,9 +538,20 @@ fn wait_with_progress(ctx: WaitProgressContext) -> Result<(), LabeledError> {
                     icons: &ctx.icons,
                     header: header.as_deref(),
                     first_render,
+                    scroll_offset,
                 };
-                render_progress(render_ctx);
-                first_render = false;
+                let rendered = render_progress(render_ctx);
+                if rendered {
+                    first_render = false;
+                    if let Some(hdr) = &header {
+                        let term_width = size().map(|(w, _)| w).unwrap_or(u16::MAX);
+                        if term_width >= WIDTH_COMPACT && marquee_needed(hdr, term_width) {
+                            let gap = "     ";
+                            let cycle_len = hdr.chars().count() + gap.chars().count();
+                            scroll_offset = (scroll_offset + 1) % cycle_len;
+                        }
+                    }
+                }
                 last_render = Instant::now();
             }
             std::thread::sleep(KEY_POLL_INTERVAL);
@@ -545,8 +567,12 @@ fn wait_with_progress(ctx: WaitProgressContext) -> Result<(), LabeledError> {
             icons: &ctx.icons,
             header: header.as_deref(),
             first_render,
+            scroll_offset,
         };
-        render_progress(final_render_ctx);
+        let rendered = render_progress(final_render_ctx);
+        if rendered {
+            first_render = false;
+        }
         Ok::<(), LabeledError>(())
     })();
 
@@ -573,11 +599,9 @@ fn wait_with_progress(ctx: WaitProgressContext) -> Result<(), LabeledError> {
 // Rendering
 // ---------------------------------------------------------------------------
 
-/// Minimum terminal width below which the progress line is suppressed to
-/// avoid garbled wrapping output.
-const MIN_RENDER_WIDTH: u16 = 40;
-
 /// Context for the render_progress function, grouping all its parameters.
+///
+/// Includes `scroll_offset` for marquee rendering of the header.
 struct RenderProgressContext<'a> {
     err: &'a mut std::io::Stderr,
     elapsed: Duration,
@@ -588,27 +612,40 @@ struct RenderProgressContext<'a> {
     icons: &'a IconSet,
     header: Option<&'a str>,
     first_render: bool,
+    scroll_offset: usize,
+}
+
+fn marquee_needed(header: &str, term_width: u16) -> bool {
+    header.width() > term_width as usize
 }
 
 /// Renders one progress line in-place on stderr.
 ///
-/// Nerd Font:  ♪   0:42 / 4:05  [████████░░░░░░░░░░░░░░░░░░░░░░]  17%   100%  « [SPACE] »  [q]
-/// Unicode:    ♪ ▶  0:42 / 4:05  [████████░░░░░░░░░░░░░░░░░░░░░░]  17%  🔊 100%  « [SPACE] »  [q]
-/// ASCII:      > 0:42 / 4:05  [########......................]  17%  [V] 100%  << [SPACE] >>  [q]
-fn render_progress(ctx: RenderProgressContext) {
+/// Returns `true` if rendering occurred, or `false` if the terminal was too narrow
+/// (less than [`WIDTH_BARE`]).
+///
+/// # Layout Tiers
+///
+/// The layout adapts to the terminal width:
+/// - **Full** (≥80 cols): Progress bar, volume bar, and control hints.
+/// - **Compact** (≥50 cols): Progress bar and volume bar, no hints.
+/// - **Minimal** (≥30 cols): Text status only (`0:00/1:00 50%`).
+/// - **Bare** (≥20 cols): Percent only (`50%`).
+///
+/// # Examples
+///
+/// ```text
+/// Full:    ♪ ▶  0:42 / 4:05  [████████░░░░░░░░░░░░░░░░░░░░░░]  17%  🔊 [████░░] 100%  « [SPACE] »  [q]
+/// Compact: ♪ ▶  0:42 / 4:05  [████████░░░░░░░░░░░░░░░░░░░░░░]  17%  🔊 [████░░] 100%
+/// Minimal:  0:42/4:05 17%
+/// Bare:     17%
+/// ```
+fn render_progress(ctx: RenderProgressContext) -> bool {
     // Bail out silently on very narrow terminals rather than wrapping garbage.
-    if size().map(|(w, _)| w).unwrap_or(u16::MAX) < MIN_RENDER_WIDTH {
-        return;
-    }
-
-    // If a header is present and the terminal is too narrow to fit it on a single line,
-    // skip rendering to prevent the MoveUp(1) from causing header duplication.
-    if let Some(header) = ctx.header {
-        if let Ok((term_width, _)) = size() {
-            if term_width < header.width() as u16 {
-                return;
-            }
-        }
+    let term_size = size();
+    let term_width = term_size.as_ref().map(|(w, _)| *w).unwrap_or(u16::MAX);
+    if term_width < WIDTH_BARE {
+        return false;
     }
 
     let elapsed_str = format_duration(ctx.elapsed);
@@ -619,8 +656,6 @@ fn render_progress(ctx: RenderProgressContext) {
         (ctx.elapsed.as_secs_f64() / ctx.total.as_secs_f64()).clamp(0.0, 1.0)
     };
     let percent = (ratio * 100.0).round() as u8;
-    let vol_pct = (ctx.volume.min(VOLUME_MAX) * 100.0).round() as u8;
-    let vol_icon = ctx.icons.volume(ctx.volume);
 
     let prefix = if *ctx.icons == IconSet::NerdFont {
         format!("{} ", ctx.icons.music())
@@ -633,68 +668,6 @@ fn render_progress(ctx: RenderProgressContext) {
         ctx.icons.play()
     };
 
-    let controls_suffix = if ctx.interactive {
-        let toggle_label = if ctx.paused { "play " } else { "pause" };
-        format!(
-            "  {} [SPACE/{toggle_label}] {}  [↑↓/kj] vol  [m] mute  [q] quit",
-            ctx.icons.rewind(),
-            ctx.icons.fast_forward(),
-        )
-    } else {
-        String::new()
-    };
-
-    // Dynamic width calculation
-    let mut bar_width = 30;
-    let mut vol_bar_width = 10;
-
-    if let Ok((cols, _)) = size() {
-        let overhead = prefix.width()
-            + icon.width()
-            + 2 // "  "
-            + elapsed_str.width()
-            + 3 // " / "
-            + total_str.width()
-            + 2 // "  "
-            + 2 // "[]" main bar
-            + 2 // "  "
-            + percent.to_string().width()
-            + 1 // "%"
-            + 2 // "  "
-            + vol_icon.width()
-            + 1 // " "
-            + 2 // "[]" vol bar
-            + 1 // " "
-            + vol_pct.to_string().width()
-            + 1 // "%"
-            + controls_suffix.width();
-
-        let available = (cols as usize).saturating_sub(overhead);
-        // We want: bar_width + vol_bar_width <= available
-        // vol_bar_width = max(5, bar_width / 3)
-        // If bar_width >= 15, vol = bar_width / 3. Total = 4/3 * bar_width.
-        // If bar_width < 15, vol = 5. Total = bar_width + 5.
-
-        let min_vol = 5usize;
-        let max_bar = available.saturating_sub(min_vol);
-        let target = (available * 3) / 4;
-        bar_width = if target >= 15 {
-            target
-        } else {
-            available.saturating_sub(min_vol)
-        };
-        bar_width = bar_width.clamp(10, 60).min(max_bar);
-        vol_bar_width = (bar_width / 3).max(min_vol);
-        // Final guard: ensure bar_width + vol_bar_width never exceeds available.
-        if bar_width + vol_bar_width > available {
-            bar_width = available.saturating_sub(vol_bar_width).max(10);
-        }
-    }
-
-    let bar = render_bar(ratio, bar_width, ctx.icons);
-    let vol_ratio = (ctx.volume as f64 / VOLUME_MAX as f64).clamp(0.0, 1.0);
-    let vol_bar = render_bar(vol_ratio, vol_bar_width, ctx.icons);
-
     // Build the entire output (header + progress line) into a single buffer so
     // it is written to the terminal in one write_all + flush — eliminating the
     // partial-state flicker that multiple separate write!/queue! calls cause on
@@ -702,42 +675,43 @@ fn render_progress(ctx: RenderProgressContext) {
     let mut buf: Vec<u8> = Vec::new();
 
     if let Some(hdr) = ctx.header {
-        if ctx.first_render {
-            // Reserve a blank line that will become the header line.  The
-            // cursor ends up one line below it, which is exactly where the
-            // progress line lives from this point on.
+        if term_width >= WIDTH_COMPACT {
+            if ctx.first_render {
+                // Reserve a blank line that will become the header line.  The
+                // cursor ends up one line below it, which is exactly where the
+                // progress line lives from this point on.
+                let _ = buf.write_all(b"\n");
+            }
+            // Move up to the header line, clear it, and redraw.
+            let _ = queue!(buf, MoveUp(1));
+            let _ = queue!(buf, MoveToColumn(0));
+
+            if marquee_needed(hdr, term_width) {
+                let gap = "     ";
+                let mut current_width = 0;
+                let mut visible = String::new();
+                for c in hdr
+                    .chars()
+                    .chain(gap.chars())
+                    .cycle()
+                    .skip(ctx.scroll_offset)
+                {
+                    let w = c.width().unwrap_or(0);
+                    if current_width + w > term_width as usize {
+                        break;
+                    }
+                    current_width += w;
+                    visible.push(c);
+                }
+                let _ = buf.write_all(visible.as_bytes());
+            } else {
+                let _ = buf.write_all(hdr.as_bytes());
+            }
+
+            let _ = queue!(buf, Clear(ClearType::UntilNewLine));
+            // Drop back down to the progress line.
             let _ = buf.write_all(b"\n");
         }
-        // Move up to the header line, clear it, and redraw.
-        let _ = queue!(buf, MoveUp(1));
-        let _ = queue!(buf, MoveToColumn(0));
-
-        let term_width = size().map(|(w, _)| w).unwrap_or(80) as usize;
-        if hdr.width() > term_width {
-            let ellipsis = if *ctx.icons == IconSet::Ascii {
-                "..."
-            } else {
-                "…"
-            };
-            let max_len = term_width.saturating_sub(ellipsis.width());
-            let mut width = 0;
-            let mut truncated = String::new();
-            for c in hdr.chars() {
-                let w = c.width().unwrap_or(0);
-                if width + w > max_len {
-                    break;
-                }
-                width += w;
-                truncated.push(c);
-            }
-            let _ = write!(buf, "{}{}", truncated, ellipsis);
-        } else {
-            let _ = buf.write_all(hdr.as_bytes());
-        }
-
-        let _ = queue!(buf, Clear(ClearType::UntilNewLine));
-        // Drop back down to the progress line.
-        let _ = buf.write_all(b"\n");
     }
 
     // Redraw the progress line.
@@ -745,14 +719,89 @@ fn render_progress(ctx: RenderProgressContext) {
     let _ = queue!(buf, SetAttribute(Attribute::Bold));
     let _ = buf.write_all(format!("{prefix}{icon}").as_bytes());
     let _ = queue!(buf, SetAttribute(Attribute::Reset));
-    let _ = buf.write_all(
-        format!("  {elapsed_str} / {total_str}  {bar}  {percent}%  {vol_icon} {vol_bar} {vol_pct}%{controls_suffix}")
-            .as_bytes(),
-    );
+
+    if term_width >= WIDTH_COMPACT {
+        let vol_pct = (ctx.volume.min(VOLUME_MAX) * 100.0).round() as u8;
+        let vol_icon = ctx.icons.volume(ctx.volume);
+
+        let controls_suffix = if term_width >= WIDTH_FULL && ctx.interactive {
+            let toggle_label = if ctx.paused { "play " } else { "pause" };
+            format!(
+                "  {} [SPACE/{toggle_label}] {}  [↑↓/kj] vol  [m] mute  [q] quit",
+                ctx.icons.rewind(),
+                ctx.icons.fast_forward(),
+            )
+        } else {
+            String::new()
+        };
+
+        // Dynamic width calculation
+        let (bar_width, vol_bar_width) = if let Ok((cols, _)) = term_size {
+            let overhead = prefix.width()
+                + icon.width()
+                + 2 // "  "
+                + elapsed_str.width()
+                + 3 // " / "
+                + total_str.width()
+                + 2 // "  "
+                + 2 // "[]" main bar
+                + 2 // "  "
+                + percent.to_string().width()
+                + 1 // "%"
+                + 2 // "  "
+                + vol_icon.width()
+                + 1 // " "
+                + 2 // "[]" vol bar
+                + 1 // " "
+                + vol_pct.to_string().width()
+                + 1 // "%"
+                + controls_suffix.width();
+
+            let available = (cols as usize).saturating_sub(overhead);
+            // We want: bar_width + vol_bar_width <= available
+            // vol_bar_width = max(5, bar_width / 3)
+            // If bar_width >= 15, vol = bar_width / 3. Total = 4/3 * bar_width.
+            // If bar_width < 15, vol = 5. Total = bar_width + 5.
+
+            let min_vol = 5usize;
+            let max_bar = available.saturating_sub(min_vol);
+            let target = (available * 3) / 4;
+            let mut bar_width = if target >= 15 {
+                target
+            } else {
+                available.saturating_sub(min_vol)
+            };
+            bar_width = bar_width.clamp(10, 60).min(max_bar);
+            let vol_bar_width = (bar_width / 3).max(min_vol);
+            // Final guard: ensure bar_width + vol_bar_width never exceeds available.
+            if bar_width + vol_bar_width > available {
+                bar_width = available.saturating_sub(vol_bar_width).max(10);
+            }
+            (bar_width, vol_bar_width)
+        } else {
+            (30, 10)
+        };
+
+        let bar = render_bar(ratio, bar_width, ctx.icons);
+        let vol_ratio = (ctx.volume as f64 / VOLUME_MAX as f64).clamp(0.0, 1.0);
+        let vol_bar = render_bar(vol_ratio, vol_bar_width, ctx.icons);
+
+        let _ = buf.write_all(
+            format!("  {elapsed_str} / {total_str}  {bar}  {percent}%  {vol_icon} {vol_bar} {vol_pct}%{controls_suffix}")
+                .as_bytes(),
+        );
+    } else if term_width >= WIDTH_MINIMAL {
+        let _ = buf.write_all(format!(" {elapsed_str}/{total_str} {percent}%").as_bytes());
+    } else {
+        // WIDTH_BARE
+        let _ = buf.write_all(format!(" {percent}%").as_bytes());
+    }
+
     let _ = queue!(buf, Clear(ClearType::UntilNewLine));
 
     let _ = ctx.err.write_all(&buf);
     let _ = ctx.err.flush();
+    true
 }
 
 /// Renders a single progress bar of the given `width` as a `String`.
