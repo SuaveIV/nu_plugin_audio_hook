@@ -709,6 +709,14 @@ fn render_progress(ctx: RenderProgressContext) -> bool {
             let _ = queue!(buf, Clear(ClearType::UntilNewLine));
             // Drop back down to the progress line.
             let _ = buf.write_all(b"\n");
+        } else if ctx.header_reserved {
+            // Terminal has narrowed below compact tier but the header line was
+            // already reserved — move up, clear it, and drop back down so it
+            // does not sit frozen above the progress line.
+            let _ = queue!(buf, MoveUp(1));
+            let _ = queue!(buf, MoveToColumn(0));
+            let _ = queue!(buf, Clear(ClearType::UntilNewLine));
+            let _ = buf.write_all(b"\n");
         }
     }
 
