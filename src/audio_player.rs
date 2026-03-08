@@ -760,19 +760,20 @@ fn render_progress(ctx: RenderProgressContext) -> bool {
             // If bar_width < 15, vol = 5. Total = bar_width + 5.
 
             let min_vol = 5usize;
-            let max_bar = available.saturating_sub(min_vol);
             let target = (available * 3) / 4;
-            let mut bar_width = if target >= 15 {
+            let tentative = if target >= 15 {
                 target
             } else {
                 available.saturating_sub(min_vol)
             };
-            bar_width = bar_width.clamp(10, 60).min(max_bar);
+            let bar_width = tentative.clamp(0, 60);
             let vol_bar_width = (bar_width / 3).max(min_vol);
             // Final guard: ensure bar_width + vol_bar_width never exceeds available.
-            if bar_width + vol_bar_width > available {
-                bar_width = available.saturating_sub(vol_bar_width);
-            }
+            let bar_width = if bar_width + vol_bar_width > available {
+                available.saturating_sub(vol_bar_width)
+            } else {
+                bar_width
+            };
             (bar_width, vol_bar_width)
         } else {
             (30, 10)
