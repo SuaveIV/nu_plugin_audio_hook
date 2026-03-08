@@ -569,9 +569,7 @@ fn wait_with_progress(ctx: WaitProgressContext) -> Result<(), LabeledError> {
             first_render,
             scroll_offset,
         };
-        let rendered = render_progress(final_render_ctx);
-        if rendered {
-        }
+        render_progress(final_render_ctx);
         Ok::<(), LabeledError>(())
     })();
 
