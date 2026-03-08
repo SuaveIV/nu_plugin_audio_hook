@@ -47,19 +47,19 @@ jobs:
       - name: Wait for main release
         run: |
           echo "Waiting for main release to be published for tag ${{ env.TAG }}"
-          for i in {1..360}; do
+          for i in {1..90}; do
             DRAFT=$(gh api "repos/${{ github.repository }}/releases/tags/${{ env.TAG }}" \
               --jq '.draft' 2>/dev/null || echo "notfound")
             if [ "$DRAFT" = "false" ]; then
               echo "Release is published, proceeding"
               break
             fi
-            if [ "$i" -eq 360 ]; then
+            if [ "$i" -eq 90 ]; then
               echo "Timeout waiting for release"
               exit 1
             fi
-            echo "Attempt $i/360: waiting..."
-            sleep 5
+            echo "Attempt $i/90: waiting..."
+            sleep 10
           done
       - name: Upload to Release
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
