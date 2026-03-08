@@ -21,7 +21,7 @@ jobs:
       - name: Setup Nushell
         uses: hustcer/setup-nu@920172d92eb04671776f3ba69d605d3b09351c30  # v3
         with:
-          version: "0.110.0"
+          version: "0.111.0"
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -33,43 +33,74 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: nu {0}
         run: |
+          def "http-get-with-retry" [url: string, max_retries: int = 3, timeout: duration = 10sec]: nothing -> any {
+            mut last_err = null
+            for attempt in 1..$max_retries {
+              let err = try {
+                return (http get --max-time $timeout $url)
+              } catch {|e| $e }
+
+              $last_err = $err
+              if $attempt < $max_retries {
+                sleep (($attempt * 200) * 1ms)
+              }
+            }
+            error make {
+              msg: $"Failed to fetch ($url) after ($max_retries) attempts"
+              help: ($last_err | get msg? | default "unknown error")
+            }
+          }
+
           def "gh latest tag" [repo: string]: nothing -> string {
-            http get --headers [Authorization $"Bearer ($env.GITHUB_TOKEN)"] $"https://api.github.com/repos/($repo)/releases/latest"
+            http-get-with-retry $"https://api.github.com/repos/($repo)/releases/latest" 3 10sec
               | get tag_name
+          }
+
+          def "validate-version-format" [version: string]: nothing -> bool {
+            if ($version | is-empty) {
+              return false
+            }
+            let numeric_part = ($version | str replace --regex "^v" "")
+            return ($numeric_part =~ '^[0-9]+(\.[0-9]+)*$')
           }
 
           let plugin_repository = "nushell/nushell"
           let plugin_version = (try {
-              http get https://crates.io/api/v1/crates/nu-plugin?include=keywords%2Ccategories%2Cdownloads%2Cdefault_version
+              http-get-with-retry "https://crates.io/api/v1/crates/nu-plugin?include=keywords%2Ccategories%2Cdownloads%2Cdefault_version" 3 10sec
                 | get crate.default_version
             } catch {
               gh latest tag $plugin_repository
             })
 
-          $plugin_version | str replace --regex "^v" "" | let sanitized_plugin_version: string
+          if not (validate-version-format $plugin_version) {
+            error make {msg: $"Invalid version format received: ($plugin_version)"}
+          }
+
+          let sanitized_plugin_version: string = ($plugin_version | str replace --regex "^v" "")
 
           mut content = (open Cargo.toml --raw)
+          let toml_data = ($content | from toml)
 
-          let toml_data = (open Cargo.toml)
-
-          ($toml_data.dependencies? | default {} | columns)
-            | append ($toml_data.dev-dependencies? | default {} | columns)
-            | where ($it =~ "^nu-.*")
+          let nu_deps: list<string> = (
+            ($toml_data.dependencies? | default {} | columns)
+            | append (($toml_data | get "dev-dependencies"?) | default {} | columns)
+            | where {|dep| $dep =~ "^nu-.*"}
             | uniq
-            | let nu_deps: list<string>
+          )
 
           $content = ($nu_deps | reduce --fold $content {|dep, acc|
+            let escaped_dep = ($dep | str replace --regex "([\\[\\]\\(\\)\\*\\+\\?\\^\\$\\.\\|])" "\\$1")
             $acc
-              | str replace --regex ("(?m)^(" + $dep + "\\s*=\\s*)\".*?\"") ("${1}\"" + $sanitized_plugin_version + "\"")
-              | str replace --regex ("(?s)(\\[dependencies\\." + $dep + "\\][^\\[]*?version\\s*=\\s*)\".*?\"") ("${1}\"" + $sanitized_plugin_version + "\"")
-              | str replace --regex ("(?m)^(" + $dep + "\\s*=.*version\\s*=\\s*)\"[^\"]+\"") ("${1}\"" + $sanitized_plugin_version + "\"")
+              | str replace --regex $"\\(?m\\)^\\(($escaped_dep)\\s*=\\s*\\)\".*?\"" $"${1}\"($sanitized_plugin_version)\""
+              | str replace --regex $"\\(?s\\)\\(\\[dependencies\\.($escaped_dep)\\][^\\[]*?version\\s*=\\s*\\)\".*?\"" $"${1}\"($sanitized_plugin_version)\""
+              | str replace --regex $"\\(?m\\)^\\(($escaped_dep)\\s*=.*version\\s*=\\s*\\)\"[^\"]+\"" $"${1}\"($sanitized_plugin_version)\""
           })
 
           $content | save --force Cargo.toml
 
           rm --force Cargo.lock
-          cargo update
-          cargo check
+          ^cargo update
+          ^cargo check
 
       - name: Update CONTRIBUTORS.md
         run: |
@@ -88,7 +119,7 @@ jobs:
         id: extract_version
         shell: nu {0}
         run: |
-          open Cargo.toml | get package.version | str trim | let version: string
+          let version: string = (open Cargo.toml | get package.version | str trim)
           $"version=($version)" | save --force $env.GITHUB_OUTPUT
 
       - name: Create Pull Request
@@ -96,7 +127,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: bump dependencies to ${{ steps.extract_version.outputs.version }} and update contributors"
-          title: "chore: update dependencies to v${{ steps.extract_version.outputs.version }}"
+          title: "chore: update dependencies to v${{ steps.extract_version.outputs.version }} and update contributors"
           body: "Automated PR to update Nushell dependencies and contributors."
           branch: "chore/update-dependencies"
           author: "GitHub-Action <action@github.com>"
