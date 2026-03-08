@@ -5,135 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v0.2.3 (2026-03-08)
-
-### Chore
-
- - <csr-id-d448783bd8166c11c09218bf188239aa05cfd0b4/> pin dist action SHAs in dist-workspace.toml
- - <csr-id-87324c1ca5523c3caae9ec143111c631a8cf25b4/> reduce release wait timeout from 30m to 15m
-   Increase poll interval from 5s to 10s and reduce iterations from
-   360 to 90, halving unnecessary API calls while still providing
-   sufficient time for the main dist release to complete.
- - <csr-id-2076bf2c8486ee0512ccdf52aab5511d20444ce5/> pin action SHAs and enable artifact attestations
-   Pin all GitHub Actions in release.yml and release-arm64.yml to
-   specific commit SHAs to prevent supply-chain attacks via tag mutation.
-   Enable github-attestations in dist-workspace.toml to cryptographically
-   bind release artifacts to their workflow run.
- - <csr-id-ccd7677f11e2c3e3b748b7e50eb8c98c6ea775fb/> update actions/checkout and action-gh-release versions in workflows
- - <csr-id-1999f45c9b840472674f6032b79fef0fd11c9ad6/> bump dependencies to 0.2.2 and update contributors
-
-### Documentation
-
- - <csr-id-35391808753eadabcf468e7a94ae3686d1c780b8/> update installation instructions and add target details for prebuilt binaries
-
-### New Features
-
- - <csr-id-c3680a994cb8948cfd7bbd28b1c8c667338e8922/> add tag format validation and improve checksum command syntax
- - <csr-id-df0b440ab98843c02b2dc236a8fa33f9cb08d9da/> add checksum verification for downloaded binaries
- - <csr-id-639724bd386a7fe20c92774f0944b76f3cba451f/> add checksum generation and include in release upload
-
-### Bug Fixes
-
- - <csr-id-25785de4250463f915a80d14c67bf61b72deb4d2/> clear frozen header line when terminal narrows below compact tier
- - <csr-id-a94d52afe780b5788bb976498f53b4b06f95ef01/> track header-line reservation separately from first_render
- - <csr-id-9479ea0e9c291c17d279ad53e3d3a58760bd49a2/> continue check even if fmt or clippy fails
- - <csr-id-69e331e56e017276e15b602e7be67b24e858c208/> replace dev recipes with platform-specific install-nx/win variants
- - <csr-id-af43fefe237f5d21f2345b2cad2113e6cedc6677/> guarantee bar_width + vol_bar_width never exceeds available columns
- - <csr-id-02086f255b5afd6df785faf8c46a1772b53e5af1/> wrap plugin add calls with nu -c using portable double quotes
- - <csr-id-fc4cc50ab683b682990ef7208cd955464053e8a1/> wrap plugin add calls with nu -c
- - <csr-id-2f382785c8218bacb0dcbafefb9fe35aab174d8b/> simplify progress rendering logic in wait_with_progress function
- - <csr-id-0969f0af5e2b01c1ad7f3ca312156c9b1f16c1e7/> remove dead assignment, fix bar overflow, and deduplicate marquee gap
-   - Remove the dead `first_render = false` after the final render_progress
-     call in wait_with_progress — the function returns immediately afterward
-     so the assignment never had any effect
-   - Fix bar_width + vol_bar_width potentially exceeding available columns
-     when the .max(10) clamp pushed bar_width back above the safe limit on
-     narrow terminals; constrained is now computed first and .max(10) is
-     not applied when available space is too small to honour it
-   - Extract the marquee gap string into a MARQUEE_GAP constant so the
-     scrolling math in wait_with_progress and the renderer in render_progress
-     are guaranteed to use the same value; a mismatch between the two would
-     have caused visible scroll drift
- - <csr-id-d17767d9d9f6b1f485ad59fe2edfa6857f460010/> degrade gracefully on narrow terminals and scroll long headers
-   - Replace the hard bail-out width guard with four layout tiers (full,
-     compact, minimal, bare) so the progress display renders something
-     useful at any terminal width rather than silently dropping frames
-   - Add marquee scrolling for artist/title headers that are too wide to
-     fit on one line; scroll_offset advances only on successful draws and
-     freezes when the header fits statically
-   - Fix first_render tracking so MoveUp(1) is only emitted after a frame
-     was actually drawn, preventing header duplication and output smear on
-     narrow terminals
-   - Use unicode-width column counting in the marquee slicer instead of
-     char counts to handle multibyte and CJK characters correctly
-   - Extract WIDTH_FULL, WIDTH_COMPACT, WIDTH_MINIMAL, WIDTH_BARE constants
-     to replace the former MIN_RENDER_WIDTH magic number
-   - Change render_progress return type from () to bool to communicate
-     whether a frame was actually drawn back to the caller
-   - Fix dead initial assignments for bar_width and vol_bar_width by
-     restructuring the size() block as an expression with an explicit
-     fallback, eliminating the unused_assignments warnings
- - <csr-id-ba64249713b6857e7b6ffbb48098cde007d6ede5/> scope permissions to job level and attest before upload
- - <csr-id-ecdc036370dddd81f5d1c4288d3fafc6e6f48958/> add attestations permissions and implement artifact attestation in release workflow
-   Fixes SuaveIV/nu_plugin_audio#13
- - <csr-id-24b9e4a2346576ced214ef6d02aa23e719b41a03/> improve regex for updating dependency version format in Cargo.toml
- - <csr-id-8d929dabd270b348149ecae7d99d7ff9a4b9edb2/> update dependency version extraction logic and adjust commit message in PR creation
- - <csr-id-eef7f3f84ac88c53b37db56753a2d76c07f4f15f/> checkout requested tag on dispatch and handle dev-dependency table form
- - <csr-id-e52cc30ec7e468e0532eea5c452f5fbb3bbfc7aa/> fix nushell script bugs and upgrade to 0.111.0
-   - Replace `str matches` with `=~` operator (command does not exist)
-   - Replace string `+` concatenation with `$"..."` interpolation
-   - Fix `| let name: type` pipeline annotation (unsupported form)
-   - Fix `.dev-dependencies?` dot access ambiguity with `get "dev-dependencies"?`
-   - Replace `$it` in `where` with explicit closure for 0.111 compatibility
-   - Prefix external `cargo` calls with `^` to prevent shadowing
-   - Open Cargo.toml once with `--raw` and derive parsed form via `from toml`
-   - Escape `$dep` before regex interpolation to handle metacharacters
-   - Fix `{escaped_dep}` and `{sanitized_plugin_version}` bare braces to `($var)`
-   - Wrap `let nu_deps` pipeline in outer parens for correct parse
-   - Simplify `validate-version-format` to single `=~` check
-   - Remove unreachable `null` after `return` in `http-get-with-retry`
-
-### Commit Details
-
-<csr-read-only-do-not-edit/>
-
-<details><summary>view details</summary>
-
- * **Uncategorized**
-    - Merge pull request #16 from SuaveIV/issue-10-player-bar-fix ([`002ddef`](https://github.com/SuaveIV/nu_plugin_audio/commit/002ddeff64866f58243d62904623937d490a7839))
-    - Clear frozen header line when terminal narrows below compact tier ([`25785de`](https://github.com/SuaveIV/nu_plugin_audio/commit/25785de4250463f915a80d14c67bf61b72deb4d2))
-    - Track header-line reservation separately from first_render ([`a94d52a`](https://github.com/SuaveIV/nu_plugin_audio/commit/a94d52afe780b5788bb976498f53b4b06f95ef01))
-    - Continue check even if fmt or clippy fails ([`9479ea0`](https://github.com/SuaveIV/nu_plugin_audio/commit/9479ea0e9c291c17d279ad53e3d3a58760bd49a2))
-    - Replace dev recipes with platform-specific install-nx/win variants ([`69e331e`](https://github.com/SuaveIV/nu_plugin_audio/commit/69e331e56e017276e15b602e7be67b24e858c208))
-    - Guarantee bar_width + vol_bar_width never exceeds available columns ([`af43fef`](https://github.com/SuaveIV/nu_plugin_audio/commit/af43fefe237f5d21f2345b2cad2113e6cedc6677))
-    - Wrap plugin add calls with nu -c using portable double quotes ([`02086f2`](https://github.com/SuaveIV/nu_plugin_audio/commit/02086f255b5afd6df785faf8c46a1772b53e5af1))
-    - Wrap plugin add calls with nu -c ([`fc4cc50`](https://github.com/SuaveIV/nu_plugin_audio/commit/fc4cc50ab683b682990ef7208cd955464053e8a1))
-    - Simplify progress rendering logic in wait_with_progress function ([`2f38278`](https://github.com/SuaveIV/nu_plugin_audio/commit/2f382785c8218bacb0dcbafefb9fe35aab174d8b))
-    - Remove dead assignment, fix bar overflow, and deduplicate marquee gap ([`0969f0a`](https://github.com/SuaveIV/nu_plugin_audio/commit/0969f0af5e2b01c1ad7f3ca312156c9b1f16c1e7))
-    - Degrade gracefully on narrow terminals and scroll long headers ([`d17767d`](https://github.com/SuaveIV/nu_plugin_audio/commit/d17767d9d9f6b1f485ad59fe2edfa6857f460010))
-    - Merge pull request #15 from SuaveIV/issue-13-arm64-attest ([`92ce614`](https://github.com/SuaveIV/nu_plugin_audio/commit/92ce614b45ff45456ada533e83975b245a732f15))
-    - Scope permissions to job level and attest before upload ([`ba64249`](https://github.com/SuaveIV/nu_plugin_audio/commit/ba64249713b6857e7b6ffbb48098cde007d6ede5))
-    - Add attestations permissions and implement artifact attestation in release workflow ([`ecdc036`](https://github.com/SuaveIV/nu_plugin_audio/commit/ecdc036370dddd81f5d1c4288d3fafc6e6f48958))
-    - Merge pull request #12 from SuaveIV/security_upgrrade_1 ([`ef955eb`](https://github.com/SuaveIV/nu_plugin_audio/commit/ef955ebd8fc5d87dcfc4adf80dd6bd4b38971b09))
-    - Improve regex for updating dependency version format in Cargo.toml ([`24b9e4a`](https://github.com/SuaveIV/nu_plugin_audio/commit/24b9e4a2346576ced214ef6d02aa23e719b41a03))
-    - Update dependency version extraction logic and adjust commit message in PR creation ([`8d929da`](https://github.com/SuaveIV/nu_plugin_audio/commit/8d929dabd270b348149ecae7d99d7ff9a4b9edb2))
-    - Checkout requested tag on dispatch and handle dev-dependency table form ([`eef7f3f`](https://github.com/SuaveIV/nu_plugin_audio/commit/eef7f3f84ac88c53b37db56753a2d76c07f4f15f))
-    - Pin dist action SHAs in dist-workspace.toml ([`d448783`](https://github.com/SuaveIV/nu_plugin_audio/commit/d448783bd8166c11c09218bf188239aa05cfd0b4))
-    - Reduce release wait timeout from 30m to 15m ([`87324c1`](https://github.com/SuaveIV/nu_plugin_audio/commit/87324c1ca5523c3caae9ec143111c631a8cf25b4))
-    - Pin action SHAs and enable artifact attestations ([`2076bf2`](https://github.com/SuaveIV/nu_plugin_audio/commit/2076bf2c8486ee0512ccdf52aab5511d20444ce5))
-    - Fix nushell script bugs and upgrade to 0.111.0 ([`e52cc30`](https://github.com/SuaveIV/nu_plugin_audio/commit/e52cc30ec7e468e0532eea5c452f5fbb3bbfc7aa))
-    - Add tag format validation and improve checksum command syntax ([`c3680a9`](https://github.com/SuaveIV/nu_plugin_audio/commit/c3680a994cb8948cfd7bbd28b1c8c667338e8922))
-    - Update actions/checkout and action-gh-release versions in workflows ([`ccd7677`](https://github.com/SuaveIV/nu_plugin_audio/commit/ccd7677f11e2c3e3b748b7e50eb8c98c6ea775fb))
-    - Merge pull request #11 from SuaveIV/chore/update-dependencies ([`67d2255`](https://github.com/SuaveIV/nu_plugin_audio/commit/67d2255cc674339dd5caef7b34a278e9b6700485))
-    - Bump dependencies to 0.2.2 and update contributors ([`1999f45`](https://github.com/SuaveIV/nu_plugin_audio/commit/1999f45c9b840472674f6032b79fef0fd11c9ad6))
-    - Update installation instructions and add target details for prebuilt binaries ([`3539180`](https://github.com/SuaveIV/nu_plugin_audio/commit/35391808753eadabcf468e7a94ae3686d1c780b8))
-    - Add checksum verification for downloaded binaries ([`df0b440`](https://github.com/SuaveIV/nu_plugin_audio/commit/df0b440ab98843c02b2dc236a8fa33f9cb08d9da))
-    - Add checksum generation and include in release upload ([`639724b`](https://github.com/SuaveIV/nu_plugin_audio/commit/639724bd386a7fe20c92774f0944b76f3cba451f))
-</details>
-
 ## v0.2.2 (2026-03-05)
-
-<csr-id-3809e33e90edbc4ec545e883f7cb7ee86cef16e9/>
 
 ### Chore
 
@@ -156,7 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - <csr-id-e487a117c0e3b2755c975113bf835cf638a8bc5d/> cast sample to f64 before multiply to support 64bit feature
  - <csr-id-f4850e2cb8c511137df1ca4cdb652b3156469443/> ensure credentials are not persisted during checkout in dependency update workflow
  - <csr-id-1c0ce8935d3f2a83a612e375e6bdcea09d2384e8/> enable ARM64 build job in GitHub Actions workflow
- - <csr-id-17810c54a98aa05c37cc3d9283cdd0c66f23a513/> improve wait message and check for published release
 
 ### Commit Details
 
@@ -165,8 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
-    - Improve wait message and check for published release ([`17810c5`](https://github.com/SuaveIV/nu_plugin_audio/commit/17810c54a98aa05c37cc3d9283cdd0c66f23a513))
-    - Release nu_plugin_audio v0.2.2 ([`438b17a`](https://github.com/SuaveIV/nu_plugin_audio/commit/438b17a0834562c2432b2e2106c4b34d9da4fac8))
     - Suppress header render when terminal too narrow to fit on one line ([`15632cc`](https://github.com/SuaveIV/nu_plugin_audio/commit/15632ccaad3ccf6dfd0562596c2006c0a2bf2ef6))
     - Cast sample to f64 before multiply to support 64bit feature ([`e487a11`](https://github.com/SuaveIV/nu_plugin_audio/commit/e487a117c0e3b2755c975113bf835cf638a8bc5d))
     - Ensure credentials are not persisted during checkout in dependency update workflow ([`f4850e2`](https://github.com/SuaveIV/nu_plugin_audio/commit/f4850e2cb8c511137df1ca4cdb652b3156469443))
@@ -178,7 +47,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## v0.2.1 (2026-03-04)
 
 <csr-id-a2eda3f6b11eaefc0235efc777f8531b34f334c0/>
-<csr-id-8f3c1ec53d218acada8a05945d199bab30793c0c/>
 
 ### Documentation
 
@@ -256,6 +124,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Enhance audio playback support and improve WAV generation ([`46cfd59`](https://github.com/SuaveIV/nu_plugin_audio/commit/46cfd591cc1bb53ecf602fc36a8c02695cfdc714))
     - Update dependencies and enhance audio handling ([`c79d8d3`](https://github.com/SuaveIV/nu_plugin_audio/commit/c79d8d369c286a89a3f52177c622f43e1cbcd91e))
 </details>
+
+<csr-unknown>
+Changed OutputStreamBuilder to DeviceSinkBuilder for audio output stream handling.Updated audio source handling to use Player instead of Sink.Adjusted sample rate and channel retrieval to use the new API methods.Enhanced sine wave generation and playback functionality with updated types.<csr-unknown/>
 
 ## v0.1.0 (2026-03-03)
 
@@ -384,11 +255,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - <csr-id-9e71bea71ac2fb76fa3a569b0dd292ed13a80aea/> expand TAG_MAP, expose FileProperties, artwork, and fix duration
    - TAG_MAP: HashMap → BTreeMap; add 22 new keys (comment, lyrics, label,
    producer, remixer, replaygain_*, compilation, barcode, script, etc.)
-- Space to toggle play/pause
-- Left/Right (or h/l) to seek
-- Up/Down (or k/j) to adjust volume
-- 'm' to toggle mute
-- 'q' or Esc to quit
+   - Space to toggle play/pause
+   - Left/Right (or h/l) to seek
+   - Up/Down (or k/j) to adjust volume
+   - 'm' to toggle mute
+   - 'q' or Esc to quit
 
 ### Bug Fixes
 
@@ -559,6 +430,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Quote paths so they can contain spaces ([`4166559`](https://github.com/SuaveIV/nu_plugin_audio/commit/416655971a94f73b189b3a683303c602d41d3e14))
     - Commit from GitHub Actions (Update dependencies) ([`3460019`](https://github.com/SuaveIV/nu_plugin_audio/commit/3460019b15d32acd84c2c3efb9a71d6463fb5dfd))
 </details>
+
+<csr-unknown>
+Add sound play --amplify examples for volume controlUpdate sound meta example output to include size, format, sample_rate, and channelsAdd --locked flag to all cargo install/build commands due to upstream dependency issueFix markdownlint warnings (MD040, MD036, MD012)sound meta: expose bitrate, audio_bitrate, bit_depth from FileProperties;expose embedded artwork as a list of {pic_type, mime_type, size} records;key lookup is now case-insensitive; insert_text failure returns LabeledErrorDuration: formatted as H:MM:SS string in both sound meta output and theprogress bar; audio_player falls back to lofty FileProperties duration sominimp3 files no longer need a manual -d flagREADME: updated example output, artwork/ReplayGain examples, full keyreference table, removed stale $in.duration pipeline exampleAdd live progress bar to sound play with elapsed/total time tracking.Add interactive keyboard controls for files longer than 1 minute:Left/Right (or h/l) to seekUp/Down (or k/j) to adjust volume‘m’ to toggle mute‘q’ or Esc to quitThe ‘–amplify’ flag is now available for ‘sound play’ to adjust playback volume. I also updated ‘sound make’ to clarify that its existing amplify flag can be used to make sounds quieter by using values below 1.0.Add explicit contents: write permission blockPin GitHub actions to exact commit SHAs to prevent supply chain attacksREADME: replace ‘…’ size placeholder in FLAC example with ‘42.3 MiB’utils: extract shared pub format_duration (M:SS / H:MM:SS) used by bothaudio_meta and audio_player, eliminating duplicate implementationsaudio_meta: add (Type::Binary, Type::Record) to input_output_types sonushell routes binary pipeline input to the existing unsupported-input guardaudio_meta: thread lofty container-header duration through parse_tags →parse_meta → parse_stream_meta as a fallback; use source.total_duration().or(lofty_duration) so minimp3 files no longer emit Value::nothing forthe duration field when lofty can supply itaudio_player: replace misleading piped example(‘sound meta audio.mp3 | sound play audio.mp3’) with a correct standaloneusage (‘sound play audio.mp3’); _input is not consumed by play_audioaudio_player: consolidate two lofty::read_from_path(&path) calls into onetagged_file_res, deriving both (title, artist) and source_duration from itconstants: add ‘publisher’ alias for ItemKey::Publisher alongside a commentexplaining the Vorbis/TXXX ‘organization’ conventionPin bump-script URL to full 40-char SHA (2b1f155…270f8)Pin softprops/action-gh-release to v2.5.0 SHA (a06a81a)Pin EndBug/add-and-commit to v9 SHA (a94899b)Remove -e from git shortlog to stop leaking contributor emailsRemove unused last_position variable (declared and written but never read)Cap sink.get_pos() with .min(total) so codecs that briefly report aposition beyond the stream duration don’t prematurely trigger theend-of-track break or clamp the bar to 100%Add MIN_RENDER_WIDTH (40) guard at the top of render_progress to silentlyskip rendering on very narrow terminals instead of printing wrapped garbageFix Windows file locking by dropping read handles before writing tags.Add overflow protection to WAV header generation.Handle missing duration gracefully and improve error messages.Add log dependency.<csr-unknown/>
 
 ## v0.109.1 (2025-12-03)
 
