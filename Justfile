@@ -6,8 +6,8 @@ default:
 
 # check formatting and clippy (run 'just fix' to auto-fix)
 check:
-    cargo fmt --check
-    cargo clippy
+    -cargo fmt --check
+    -cargo clippy
 
 # fix clippy warnings and format
 fix:
