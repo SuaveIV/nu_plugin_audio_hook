@@ -18,10 +18,6 @@ fix:
 build:
     cargo build
 
-# build with all decoders
-build-all:
-    cargo build --features=all-decoders
-
 # build with lite decoders
 build-lite:
     cargo build --no-default-features --features=lite
@@ -29,10 +25,6 @@ build-lite:
 # build release binary (default features)
 build-release:
     cargo build --release --locked
-
-# build release binary with all decoders
-build-release-all:
-    cargo build --release --locked --features=all-decoders
 
 # build release binary with lite decoders
 build-release-lite:
@@ -46,16 +38,6 @@ install-nx:
 # install optimized build via cargo install (Windows)
 install-win:
     cargo install --path . --locked
-    nu -c "plugin add ~\\.cargo\\bin\\nu_plugin_audio.exe"
-
-# install optimized build with all decoders (*nix)
-install-all-nx:
-    cargo install --path . --locked --features=all-decoders
-    nu -c "plugin add ~/.cargo/bin/nu_plugin_audio"
-
-# install optimized build with all decoders (Windows)
-install-all-win:
-    cargo install --path . --locked --features=all-decoders
     nu -c "plugin add ~\\.cargo\\bin\\nu_plugin_audio.exe"
 
 # install optimized build with lite decoders (*nix)

@@ -18,7 +18,7 @@ This project is a continuation and expansion of the original `nu_plugin_audio_ho
 - `sound make` - Generate a noise with a given frequency and duration.
 - `sound meta` - Retrieve metadata (duration, artist, album, etc.) from an audio file.
 - `sound meta set` - Modify metadata tags in an audio file using format-agnostic key names.
-- `sound play` - Play an audio file with a live progress display and interactive controls. By default, it supports FLAC, WAV, MP3, OGG, AAC, and MP4 playback. Use the `all-decoders` feature for an expanded set like 64-bit support.
+- `sound play` - Play an audio file with a live progress display and interactive controls. Supports FLAC, WAV, MP3, OGG, AAC, MP4, and more out of the box.
 
 ---
 
@@ -371,7 +371,7 @@ Prebuilt binaries are available for the following targets:
 | Target | Notes |
 | --- | --- |
 | `x86_64-unknown-linux-gnu` | x86_64 Linux |
-| `aarch64-unknown-linux-gnu` | ARM64 Linux — built with `--features=all-decoders` |
+| `aarch64-unknown-linux-gnu` | ARM64 Linux |
 | `x86_64-apple-darwin` | x86_64 macOS |
 | `aarch64-apple-darwin` | ARM64 macOS (Apple Silicon) |
 | `x86_64-pc-windows-msvc` | x86_64 Windows |
@@ -385,7 +385,7 @@ Only needed if you want custom feature flags:
 ```nushell
 git clone https://github.com/SuaveIV/nu_plugin_audio.git
 cd nu_plugin_audio
-cargo build -r --locked --features=all-decoders
+cargo build -r --locked
 plugin add target/release/nu_plugin_audio
 ```
 
@@ -393,9 +393,7 @@ plugin add target/release/nu_plugin_audio
 
 ## Supported formats
 
-### Default install
-
-Enabled out of the box with no extra flags (includes all Symphonia codecs):
+The following formats are supported out of the box with no extra flags:
 
 | Format | Feature flag | Notes |
 | --- | --- | --- |
@@ -409,16 +407,7 @@ Enabled out of the box with no extra flags (includes all Symphonia codecs):
 | ADPCM | `symphonia-all` | Adaptive PCM; common in games |
 | CAF | `symphonia-all` | Core Audio Format; Apple professional audio |
 | MKV / WebM (Opus) | `symphonia-all` | Open container with Opus codec |
-
-### With `--features=all-decoders`
-
-Everything above plus expanded capabilities:
-
-| Format | Feature flag | Notes |
-| --- | --- | --- |
 | 64-bit precision | `64bit` | f64 sample precision |
-
-> **Note:** The `default` feature includes `rodio/symphonia-all`, providing support for almost every common audio format out of the box.
 
 ### Compile with specific formats only
 
@@ -428,7 +417,7 @@ Users who want a smaller binary can build with the `lite` feature, which only in
 cargo build -r --locked --no-default-features --features=lite
 ```
 
-> **Note:** `cargo install` always uses the `default` feature set. Custom features require a source build.
+> **Note:** `cargo install` always uses the `default` feature set, which includes all formats in the table above. Custom features require a source build.
 
 ---
 

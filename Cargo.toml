@@ -49,6 +49,10 @@ default = [
     "rodio/symphonia-all",
     "rodio/dither",
     "rodio/symphonia-simd",
+    "rodio/64bit",
+    "rodio/recording",
+    "rodio/wav_output",
+    "rodio/experimental",
 ]
 
 lite = [
@@ -59,13 +63,8 @@ lite = [
     "rodio/symphonia-mp3",
 ]
 
-all-decoders = [
-    "default",
-    "rodio/64bit",
-    "rodio/recording",
-    "rodio/wav_output",
-    "rodio/experimental",
-]
+# Retained as an alias for backwards compatibility
+all-decoders = ["default"]
 
 [profile.release]
 codegen-units = 1
