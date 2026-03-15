@@ -61,7 +61,6 @@ lite = [
 
 all-decoders = [
     "default",
-    "rodio/minimp3",
     "rodio/64bit",
     "rodio/recording",
     "rodio/wav_output",
