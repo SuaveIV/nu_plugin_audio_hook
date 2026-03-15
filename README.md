@@ -417,7 +417,7 @@ Users who want a smaller binary can build with the `lite` feature, which only in
 cargo build -r --locked --no-default-features --features=lite
 ```
 
-> **Note:** `cargo install` always uses the `default` feature set, which includes all formats in the table above. Custom features require a source build.
+> **Note:** `cargo install` uses the `default` feature set unless you pass `--no-default-features` and/or `--features`. A source checkout is only needed for local code changes or unreleased commits.
 
 ---
 
