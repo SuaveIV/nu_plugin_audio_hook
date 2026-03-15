@@ -18,7 +18,7 @@ This project is a continuation and expansion of the original `nu_plugin_audio_ho
 - `sound make` - Generate a noise with a given frequency and duration.
 - `sound meta` - Retrieve metadata (duration, artist, album, etc.) from an audio file.
 - `sound meta set` - Modify metadata tags in an audio file using format-agnostic key names.
-- `sound play` - Play an audio file with a live progress display and interactive controls. By default, it supports FLAC, WAV, MP3, OGG, AAC, and MP4 playback. Use the `all-decoders` feature for an expanded set like minimp3 or 64-bit support.
+- `sound play` - Play an audio file with a live progress display and interactive controls. By default, it supports FLAC, WAV, MP3, OGG, AAC, and MP4 playback. Use the `all-decoders` feature for an expanded set like 64-bit support.
 
 ---
 
@@ -399,7 +399,7 @@ Enabled out of the box with no extra flags (includes all Symphonia codecs):
 
 | Format | Feature flag | Notes |
 | --- | --- | --- |
-| MP3 | `symphonia-all` | Via Symphonia; better accuracy than minimp3 |
+| MP3 | `symphonia-all` | Via Symphonia |
 | FLAC | `symphonia-all` | Lossless compression |
 | OGG Vorbis | `symphonia-all` | Open lossy format |
 | WAV | `symphonia-all` | Uncompressed PCM |
@@ -416,7 +416,6 @@ Everything above plus expanded capabilities:
 
 | Format | Feature flag | Notes |
 | --- | --- | --- |
-| MP3 (minimp3) | `minimp3` | Lightweight alternative MP3 decoder |
 | 64-bit precision | `64bit` | f64 sample precision |
 
 > **Note:** The `default` feature includes `rodio/symphonia-all`, providing support for almost every common audio format out of the box.
