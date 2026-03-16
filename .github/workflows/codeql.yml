@@ -1,0 +1,45 @@
+name: CodeQL
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  schedule:
+    # Weekly scan on Monday at 09:00 ET — aligns with your dependabot schedule
+    - cron: "0 14 * * 1"
+
+jobs:
+  analyze:
+    name: Analyze (rust)
+    runs-on: ubuntu-22.04
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          submodules: recursive
+
+      - name: Install ALSA dev dependency
+        run: sudo apt-get install -y libasound2-dev pkg-config
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: rust
+          # Covers: hardcoded credentials, path traversal, use-after-free,
+          # integer overflow, and unsafe Rust patterns.
+          queries: security-and-quality
+
+      - name: Build (for CodeQL trace)
+        run: cargo build --locked
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:rust"
