@@ -21,18 +21,24 @@ jobs:
       id-token: write
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      TAG: ${{ github.event.inputs.tag || github.event.workflow_run.head_branch || github.ref_name }}
       PKG_CONFIG_SYSROOT_DIR: /usr/lib/aarch64-linux-gnu
     steps:
-      - name: Validate tag format
+      - name: Resolve and validate tag
+        id: resolve-tag
         run: |
-          if [[ ! "${{ env.TAG }}" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+          if [[ -n "${{ github.event.inputs.tag }}" ]]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG=$(gh api "repos/${{ github.repository }}/releases/latest" --jq '.tag_name')
+          fi
+          if [[ ! "$TAG" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
             echo "Error: Invalid tag format"
             exit 1
           fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ env.TAG }}
+          ref: ${{ steps.resolve-tag.outputs.tag }}
           persist-credentials: false
           submodules: recursive
       - name: Install cross
@@ -42,17 +48,17 @@ jobs:
       - name: Package
         run: |
           tar -czf \
-            "nu_plugin_audio-${{ env.TAG }}-aarch64-unknown-linux-gnu.tar.gz" \
+            "nu_plugin_audio-${{ steps.resolve-tag.outputs.tag }}-aarch64-unknown-linux-gnu.tar.gz" \
             -C target/aarch64-unknown-linux-gnu/release nu_plugin_audio
       - name: Checksum
         run: |
-          sha256sum "nu_plugin_audio-${{ env.TAG }}-aarch64-unknown-linux-gnu.tar.gz" \
-            > "nu_plugin_audio-${{ env.TAG }}-aarch64-unknown-linux-gnu.tar.gz.sha256"
+          sha256sum "nu_plugin_audio-${{ steps.resolve-tag.outputs.tag }}-aarch64-unknown-linux-gnu.tar.gz" \
+            > "nu_plugin_audio-${{ steps.resolve-tag.outputs.tag }}-aarch64-unknown-linux-gnu.tar.gz.sha256"
       - name: Wait for main release
         run: |
-          echo "Waiting for main release to be published for tag ${{ env.TAG }}"
+          echo "Waiting for main release to be published for tag ${{ steps.resolve-tag.outputs.tag }}"
           for i in {1..90}; do
-            DRAFT=$(gh api "repos/${{ github.repository }}/releases/tags/${{ env.TAG }}" \
+            DRAFT=$(gh api "repos/${{ github.repository }}/releases/tags/${{ steps.resolve-tag.outputs.tag }}" \
               --jq '.draft' 2>/dev/null || echo "notfound")
             if [ "$DRAFT" = "false" ]; then
               echo "Release is published, proceeding"
@@ -68,11 +74,11 @@ jobs:
       - name: Attest
         uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
         with:
-          subject-path: "nu_plugin_audio-${{ env.TAG }}-aarch64-unknown-linux-gnu.tar.gz"
+          subject-path: "nu_plugin_audio-${{ steps.resolve-tag.outputs.tag }}-aarch64-unknown-linux-gnu.tar.gz"
       - name: Upload to Release
         uses: softprops/action-gh-release@26e8ad27a09a225049a7075d7ec1caa2df6ff332 # v2.6.0
         with:
           files: |
-            nu_plugin_audio-${{ env.TAG }}-aarch64-unknown-linux-gnu.tar.gz
-            nu_plugin_audio-${{ env.TAG }}-aarch64-unknown-linux-gnu.tar.gz.sha256
-          tag_name: ${{ env.TAG }}
+            nu_plugin_audio-${{ steps.resolve-tag.outputs.tag }}-aarch64-unknown-linux-gnu.tar.gz
+            nu_plugin_audio-${{ steps.resolve-tag.outputs.tag }}-aarch64-unknown-linux-gnu.tar.gz.sha256
+          tag_name: ${{ steps.resolve-tag.outputs.tag }}
