@@ -1,9 +1,15 @@
 # nu_plugin_audio justfile
 set shell := ["nu", "-c"]
+set shell := ["nu", "-c"]
 
 # list available recipes
 default:
     @just --list
+
+# verify if just is using nushell
+test-shell:
+    @echo $"Shell is (if ($nu != null) { 'Nushell' } else { 'Unknown' })"
+    @echo $"Version: (version | get version)"
 
 # verify if just is using nushell
 test-shell:
@@ -64,13 +70,13 @@ release-dry:
 release:
     @echo "Ensuring cargo-dist is in sync..."
     dist init --yes
-    if (git status --porcelain .github/workflows/release.yml dist-workspace.toml | is-empty) == false { \
+    @if (git status --porcelain .github/workflows/release.yml dist-workspace.toml); then \
         echo "Error: cargo-dist files were out of sync and have been updated."; \
         echo "Please commit these changes before running 'just release' again."; \
         exit 1; \
-    }; \
-    cargo smart-release --update-crates-index --execute --changelog-without commit-statistics --no-tag; \
-    let version = (cargo pkgid | str replace -r '.*#' '' | str replace -r '.*:' ''); \
+    fi
+    cargo smart-release --update-crates-index --execute --changelog-without commit-statistics --no-tag
+    @$version = (cargo pkgid | str replace -r '.*#' '' | str replace -r '.*:' ''); \
     git tag $"v($version)" -m $"Release v($version)"; \
     git push origin main; \
     git push origin $"v($version)"
