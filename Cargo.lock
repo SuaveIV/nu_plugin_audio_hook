@@ -1520,7 +1520,7 @@ dependencies = [
 
 [[package]]
 name = "nu_plugin_audio"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "chrono",
  "crossterm",
