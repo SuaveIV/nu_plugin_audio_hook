@@ -1,6 +1,6 @@
 [package]
 name = "nu_plugin_audio"
-version = "0.2.3"
+version = "0.2.4"
 edition = "2021"
 description = "A nushell plugin to make and play sounds"
 homepage = "https://github.com/SuaveIV/nu_plugin_audio"
@@ -27,10 +27,10 @@ log = "0.4"
 version = "0.29"
 
 [dependencies.nu-plugin]
-version = "0.111.0"
+version = "0.112.0"
 
 [dependencies.nu-protocol]
-version = "0.111.0"
+version = "0.112.0"
 features = ["plugin"]
 
 [dependencies.rodio]
@@ -41,7 +41,7 @@ default-features = false
 version = "0.2"
 
 [dependencies.lofty]
-version = "0.23"
+version = "0.24"
 
 [features]
 default = [
