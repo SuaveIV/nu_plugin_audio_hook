@@ -25,16 +25,9 @@ def http-get-with-retry [ # nu-lint-ignore: missing_output_type
 }
 
 let features = [
-    flac
-    minimp3
-    symphonia-aac
-    symphonia-flac
-    symphonia-isomp4
-    symphonia-mp3
-    symphonia-vorbis
-    symphonia-wav
-    vorbis
-    wav
+    default
+    lite
+    all-decoders
 ]
 
 # Return the Rust target triple for the current platform.
@@ -93,7 +86,11 @@ def download_and_install [
         let expected = if ($expected_checksum != null) {
             $expected_checksum
         } else if ($checksum_url != null) {
-            try { http get $checksum_url | str trim } catch { null }
+            try { http get $checksum_url | str trim } catch {
+                log warning $"failed to fetch checksum from ($checksum_url)"
+                try { rm --recursive --force $tmp_dir }
+                return false
+            }
         } else {
             null
         }
