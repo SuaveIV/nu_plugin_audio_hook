@@ -1,8 +1,14 @@
 # nu_plugin_audio justfile
+set shell := ["nu", "-c"]
 
 # list available recipes
 default:
     @just --list
+
+# verify if just is using nushell
+test-shell:
+    @echo $"Shell is (if ($nu != null) { 'Nushell' } else { 'Unknown' })"
+    @echo $"Version: (version | get version)"
 
 # check formatting and clippy (run 'just fix' to auto-fix)
 check:
@@ -56,6 +62,15 @@ release-dry:
 
 # publish release to crates.io and push tag to github
 release:
-    cargo smart-release --update-crates-index --execute --changelog-without commit-statistics --no-tag
-    git tag v$(cargo pkgid | cut -d# -f2)
-    git push origin v$(cargo pkgid | cut -d# -f2)
+    @echo "Ensuring cargo-dist is in sync..."
+    dist init --yes
+    if (git status --porcelain .github/workflows/release.yml dist-workspace.toml | is-empty) == false { \
+        echo "Error: cargo-dist files were out of sync and have been updated."; \
+        echo "Please commit these changes before running 'just release' again."; \
+        exit 1; \
+    }; \
+    cargo smart-release --update-crates-index --execute --changelog-without commit-statistics --no-tag; \
+    let version = (cargo pkgid | str replace -r '.*#' '' | str replace -r '.*:' ''); \
+    git tag $"v($version)" -m $"Release v($version)"; \
+    git push origin main; \
+    git push origin $"v($version)"
